@@ -1,0 +1,4 @@
+[package]
+name = "influx"
+version = "0.1.0"
+authors = ["gobwas <gobwas@gmail.com>"]
