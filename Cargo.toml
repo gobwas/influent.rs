@@ -2,3 +2,6 @@
 name = "influx"
 version = "0.1.0"
 authors = ["gobwas <gobwas@gmail.com>"]
+
+[dependencies]
+hyper = "0.6.8"
