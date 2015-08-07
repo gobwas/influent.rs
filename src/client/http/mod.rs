@@ -51,7 +51,14 @@ impl<'a> Client for HttpClient<'a> {
             }
 
             let mut query = HashMap::new();
-            query.insert("db", self.credentials.database);
+            query.insert("db", self.credentials.database.to_string());
+
+            match options {
+                Some(Options { precision: Some(ref precision), .. }) => {
+                    query.insert("precision", precision.to_string());
+                }
+                _ => {}
+            };
 
             let request = Request {
                 url: &*{host.to_string() + "/write"},
@@ -68,3 +75,80 @@ impl<'a> Client for HttpClient<'a> {
         }
     }
 }
+
+
+
+#[cfg(test)]
+mod tests {
+    use ::serializer::Serializer;
+    use super::HttpClient;
+    use ::client::{Credentials};
+    use ::client::http::hurl::{Hurl, Request, Response, HurlResult};
+    use ::measurement::Measurement;
+    use std::cell::Cell;
+    use std::clone::Clone;
+
+    const serialized : &'static str = "serialized";
+
+    struct MockSerializer {
+        serialize_count: Cell<u16>
+    }
+
+    impl MockSerializer {
+        fn new() -> MockSerializer {
+            MockSerializer {
+                serialize_count: Cell::new(0)
+            }
+        }
+    }
+
+    impl Serializer for MockSerializer {
+        fn serialize(&self, measurement: &Measurement) -> String {
+            self.serialize_count.set(self.serialize_count.get() + 1);
+            serialized.to_string()
+        }
+    }
+
+    struct MockHurl {
+        request_count: Cell<u16>,
+        result: Box<Fn() -> HurlResult>
+    }
+
+    impl MockHurl {
+        fn new(result: Box<Fn() -> HurlResult>) -> MockHurl {
+            MockHurl {
+                request_count: Cell::new(0),
+                result: result
+            }
+        }
+    }
+
+    impl Hurl for MockHurl {
+        fn request(&self, req: Request) -> HurlResult {
+            self.request_count.set(self.request_count.get() + 1);
+            let ref f = self.result;
+            f()
+        }
+    }
+
+    fn before<'a>(result: HurlResult) -> HttpClient<'a> {        
+        let credentials = Credentials {
+            username: "gobwas",
+            password: "1234",
+            database: "test"
+        };
+
+        let serializer = MockSerializer::new();
+        let hurl = MockHurl::new(Box::new(|| Err("err".to_string())));
+
+        HttpClient::new(credentials, Box::new(serializer), Box::new(hurl))
+    }
+
+    #[test]
+    fn test_write_one() {
+
+    }
+}
+
+
+

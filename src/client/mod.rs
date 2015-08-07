@@ -22,9 +22,24 @@ pub enum Precision {
 	Hours
 }
 
+impl ToString for Precision {
+	fn to_string(&self) -> String {
+		let s = match (*self) {
+			Precision::Nanoseconds  => "n",
+			Precision::Microseconds => "u",
+			Precision::Milliseconds => "ms",
+			Precision::Seconds 	    => "s",
+			Precision::Munutes 	    => "m",
+			Precision::Hours 	    => "h"
+		};
+
+		s.to_string()
+	}
+}
+
 pub struct Options {
-	precision: Precision,
-	epoch:     Precision
+	precision: Option<Precision>,
+	epoch:     Option<Precision>
 }
 
 pub enum ClientError {

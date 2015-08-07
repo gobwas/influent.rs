@@ -10,7 +10,7 @@ pub struct Request<'a> {
 	pub url: &'a str,
 	pub method: Method,
 	pub auth: Option<Auth<'a>>,
-	pub query: Option<HashMap<&'a str, &'a str>>,
+	pub query: Option<HashMap<&'a str, String>>,
 	pub body: Option<String>
 }
 
