@@ -94,7 +94,6 @@ impl Hurl for HyperHurl {
 	    // go!
 	    match query.send() {
 	    	Ok(ref mut resp) => {
-	    		// Read the Response.
 			    let mut body = String::new();
 			    resp.read_to_string(&mut body).unwrap();
 

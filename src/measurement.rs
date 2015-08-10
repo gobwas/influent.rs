@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 
+#[derive(Debug)]
 pub enum Value<'a> {
     String(&'a str),
     Float(f64),
@@ -7,6 +8,8 @@ pub enum Value<'a> {
     Boolean(bool)
 }
 
+/// Measurement model.
+#[derive(Debug)]
 pub struct Measurement<'a> {
     pub key: &'a str,
     pub timestamp: Option<i32>,

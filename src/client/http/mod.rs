@@ -1,6 +1,6 @@
 use ::measurement::Measurement;
 use ::serializer::Serializer;
-use ::client::{Client, Credentials, Options};
+use ::client::{Precision, Client, Credentials};
 use std::collections::HashMap;
 use self::hurl::{Hurl, Request, Response, Method, Auth};
 
@@ -36,11 +36,11 @@ impl<'a> HttpClient<'a> {
 }
 
 impl<'a> Client for HttpClient<'a> {
-    fn write_one(&self, measurement: Measurement, options: Option<Options>) {
-        self.write_many(vec![measurement], options)
+    fn write_one(&self, measurement: Measurement, precision: Option<Precision>) {
+        self.write_many(vec![measurement], precision)
     }
 
-    fn write_many(&self, measurements: Vec<Measurement>, options: Option<Options>) {
+    fn write_many(&self, measurements: Vec<Measurement>, precision: Option<Precision>) {
         let host = self.get_host();
 
         for chunk in measurements.chunks(5000) {
@@ -53,8 +53,8 @@ impl<'a> Client for HttpClient<'a> {
             let mut query = HashMap::new();
             query.insert("db", self.credentials.database.to_string());
 
-            match options {
-                Some(Options { precision: Some(ref precision), .. }) => {
+            match precision {
+                Some(ref precision) => {
                     query.insert("precision", precision.to_string());
                 }
                 _ => {}
@@ -81,8 +81,9 @@ impl<'a> Client for HttpClient<'a> {
 #[cfg(test)]
 mod tests {
     use ::serializer::Serializer;
+    use ::client::{Client};
     use super::HttpClient;
-    use ::client::{Credentials};
+    use ::client::{Credentials, Precision};
     use ::client::http::hurl::{Hurl, Request, Response, HurlResult};
     use ::measurement::Measurement;
     use std::cell::Cell;
@@ -104,6 +105,7 @@ mod tests {
 
     impl Serializer for MockSerializer {
         fn serialize(&self, measurement: &Measurement) -> String {
+            println!("serializing: {:?}", measurement);
             self.serialize_count.set(self.serialize_count.get() + 1);
             serialized.to_string()
         }
@@ -126,12 +128,13 @@ mod tests {
     impl Hurl for MockHurl {
         fn request(&self, req: Request) -> HurlResult {
             self.request_count.set(self.request_count.get() + 1);
+            println!("sending: {:?}", req);
             let ref f = self.result;
             f()
         }
     }
 
-    fn before<'a>(result: HurlResult) -> HttpClient<'a> {        
+    fn before<'a>(result: Box<Fn() -> HurlResult>) -> HttpClient<'a> {        
         let credentials = Credentials {
             username: "gobwas",
             password: "1234",
@@ -139,14 +142,23 @@ mod tests {
         };
 
         let serializer = MockSerializer::new();
-        let hurl = MockHurl::new(Box::new(|| Err("err".to_string())));
+        let hurl = MockHurl::new(result);
 
         HttpClient::new(credentials, Box::new(serializer), Box::new(hurl))
     }
 
     #[test]
     fn test_write_one() {
+        let mut client = before(Box::new(|| Ok(Response { status: 200, body: "Ok".to_string() })));
+        client.add_host("http://localhost:8086");
+        client.write_one(Measurement::new("key"), Some(Precision::Nanoseconds));
+    }
 
+    #[test]
+    fn test_write_many() {
+        let mut client = before(Box::new(|| Ok(Response { status: 200, body: "Ok".to_string() })));
+        client.add_host("http://localhost:8086");
+        client.write_many(vec!(Measurement::new("key")), Some(Precision::Nanoseconds));
     }
 }
 

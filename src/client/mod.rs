@@ -3,8 +3,8 @@ use ::measurement::Measurement;
 pub mod http;
 
 pub trait Client {
-    fn write_many(&self, Vec<Measurement>, Option<Options>);
-    fn write_one(&self, Measurement, Option<Options>);
+    fn write_many(&self, Vec<Measurement>, Option<Precision>);
+    fn write_one(&self, Measurement, Option<Precision>);
 }
 
 pub struct Credentials<'a> {
@@ -35,11 +35,6 @@ impl ToString for Precision {
 
 		s.to_string()
 	}
-}
-
-pub struct Options {
-	precision: Option<Precision>,
-	epoch:     Option<Precision>
 }
 
 pub enum ClientError {
