@@ -14,30 +14,30 @@ pub struct Credentials<'a> {
 }
 
 pub enum Precision {
-	Nanoseconds,
-	Microseconds,
-	Milliseconds,
-	Seconds,
-	Munutes,
-	Hours
+    Nanoseconds,
+    Microseconds,
+    Milliseconds,
+    Seconds,
+    Munutes,
+    Hours
 }
 
 impl ToString for Precision {
-	fn to_string(&self) -> String {
-		let s = match (*self) {
-			Precision::Nanoseconds  => "n",
-			Precision::Microseconds => "u",
-			Precision::Milliseconds => "ms",
-			Precision::Seconds 	    => "s",
-			Precision::Munutes 	    => "m",
-			Precision::Hours 	    => "h"
-		};
+    fn to_string(&self) -> String {
+        let s = match (*self) {
+            Precision::Nanoseconds  => "n",
+            Precision::Microseconds => "u",
+            Precision::Milliseconds => "ms",
+            Precision::Seconds      => "s",
+            Precision::Munutes      => "m",
+            Precision::Hours        => "h"
+        };
 
-		s.to_string()
-	}
+        s.to_string()
+    }
 }
 
 pub enum ClientError {
-	Syntax,
-	Unknown
+    Syntax,
+    Unknown
 }
