@@ -8,6 +8,8 @@
 
 This is a InfluxDB driver for Rust apps.
 
+Currently, it only supports write methods.
+
 ## Install
 
 > Cargo.toml
