@@ -10,8 +10,9 @@ This is a InfluxDB driver for Rust apps.
 
 ## Install
 
+> Cargo.toml
+
 ```toml
-// Cargo.toml
 [dependencies]
 influent = "0.1"
 ```
