@@ -8,9 +8,9 @@ pub trait Client {
 }
 
 pub struct Credentials<'a> {
-    username: &'a str,
-    password: &'a str,
-    database: &'a str
+    pub username: &'a str,
+    pub password: &'a str,
+    pub database: &'a str
 }
 
 pub enum Precision {

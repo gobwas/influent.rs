@@ -14,6 +14,12 @@ use super::Hurl;
 
 pub struct HyperHurl;
 
+impl HyperHurl {
+    pub fn new() -> HyperHurl {
+        HyperHurl
+    }
+}
+
 impl Hurl for HyperHurl {
     fn request(&self, req: Request) -> HurlResult {
         let mut client = HyperClient::new();

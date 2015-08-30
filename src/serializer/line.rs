@@ -3,7 +3,25 @@ use ::serializer::Serializer;
 
 pub struct LineSerializer;
 
+/// Line spec `Measurement` serializer.
 impl LineSerializer {
+    /// Constructs new `LineSerializer`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use influent::serializer::Serializer;
+    /// use influent::serializer::line::LineSerializer;
+    /// use influent::measurement::{Measurement, Value};
+    ///
+    /// let serializer = LineSerializer::new();
+    /// let mut measurement = Measurement::new("key");
+    ///
+    /// measurement.add_field("field", Value::String("value"));
+    /// measurement.add_tag("tag", "value");
+    ///
+    /// assert_eq!("key,tag=value field=\"value\"", serializer.serialize(&measurement));
+    /// ```
     pub fn new() -> LineSerializer {
         LineSerializer
     }
