@@ -3,8 +3,9 @@ use ::measurement::Measurement;
 pub mod http;
 
 pub trait Client {
-    fn write_many(&self, Vec<Measurement>, Option<Precision>);
-    fn write_one(&self, Measurement, Option<Precision>);
+    fn write_many(&self, Vec<Measurement>, Option<Precision>) -> ClientWriteResult;
+    fn write_one(&self, Measurement, Option<Precision>) -> ClientWriteResult;
+    fn query(&self, String, Option<Precision>) -> ClientReadResult;
 }
 
 pub struct Credentials<'a> {
@@ -37,7 +38,14 @@ impl ToString for Precision {
     }
 }
 
+pub type ClientWriteResult = Result<(), ClientError>;
+
+// TODO: here parsing json?
+pub type ClientReadResult = Result<String, ClientError>;
+
+#[derive(Debug)]
 pub enum ClientError {
-    Syntax,
+    Network(String),
+    Syntax(String),
     Unknown
 }

@@ -21,6 +21,12 @@ pub struct Response {
     pub body: String
 }
 
+impl ToString for Response {
+    fn to_string(&self) -> String {
+        self.body.clone()
+    }
+}
+
 pub type HurlResult = Result<Response, String>;
 
 #[derive(Debug)]

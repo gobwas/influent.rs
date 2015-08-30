@@ -1,6 +1,6 @@
 use ::measurement::Measurement;
 use ::serializer::Serializer;
-use ::client::{Precision, Client, Credentials};
+use ::client::{Precision, Client, Credentials, ClientError, ClientReadResult, ClientWriteResult};
 use std::collections::HashMap;
 use self::hurl::{Hurl, Request, Response, Method, Auth};
 
@@ -36,11 +36,44 @@ impl<'a> HttpClient<'a> {
 }
 
 impl<'a> Client for HttpClient<'a> {
-    fn write_one(&self, measurement: Measurement, precision: Option<Precision>) {
+    fn query(&self, q: String, epoch: Option<Precision>) -> ClientReadResult {
+        let host = self.get_host();
+
+        let mut query = HashMap::new();
+        query.insert("db", self.credentials.database.to_string());
+        query.insert("q", q);
+
+        match epoch {
+            Some(ref epoch) => {
+                query.insert("epoch", epoch.to_string());
+            }
+            _ => {}
+        };
+
+        let request = Request {
+            url: &*{host.to_string() + "/query"},
+            method: Method::GET,
+            auth: Some(Auth {
+                username: self.credentials.username,
+                password: self.credentials.password
+            }),
+            query: Some(query),
+            body: None
+        };
+
+        match self.hurl.request(request) {
+            Ok(ref resp) if resp.status == 200 => Ok(resp.to_string()),
+            Ok(ref resp) if resp.status == 400 => Err(ClientError::Syntax(resp.to_string())),
+            Ok(_) => Err(ClientError::Unknown),
+            Err(reason) => Err(ClientError::Network(reason))
+        }
+    }
+
+    fn write_one(&self, measurement: Measurement, precision: Option<Precision>) -> ClientWriteResult {
         self.write_many(vec![measurement], precision)
     }
 
-    fn write_many(&self, measurements: Vec<Measurement>, precision: Option<Precision>) {
+    fn write_many(&self, measurements: Vec<Measurement>, precision: Option<Precision>) -> ClientWriteResult {
         let host = self.get_host();
 
         for chunk in measurements.chunks(5000) {
@@ -71,8 +104,13 @@ impl<'a> Client for HttpClient<'a> {
                 body: Some(lines.connect("\n"))
             };
 
-            self.hurl.request(request);
+            match self.hurl.request(request) {
+                Ok(_) => {},
+                Err(reason) => return Err(ClientError::Network(reason))
+            };
         }
+
+        Ok(())
     }
 }
 
