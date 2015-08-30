@@ -22,19 +22,19 @@ use serializer::line::LineSerializer;
 /// use influent::client::Credentials;
 ///
 /// let credentials = Credentials {
-///		username: "gobwas",
-///	    password: "xxx",
-///		database: "mydb"
-///	};
+///     username: "gobwas",
+///     password: "xxx",
+///     database: "mydb"
+/// };
 ///
-///	let client = create_client(credentials, vec!["http://localhost:8086"]);
+/// let client = create_client(credentials, vec!["http://localhost:8086"]);
 /// ```
 pub fn create_client<'a>(credentials: Credentials<'a>, hosts: Vec<&'a str>) -> HttpClient<'a> {
-	let mut client = HttpClient::new(credentials, Box::new(LineSerializer::new()), Box::new(HyperHurl::new()));
+    let mut client = HttpClient::new(credentials, Box::new(LineSerializer::new()), Box::new(HyperHurl::new()));
 
-	for host in hosts {
-		client.add_host(host);
-	}
+    for host in hosts {
+        client.add_host(host);
+    }
 
-	client
+    client
 }

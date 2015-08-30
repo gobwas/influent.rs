@@ -7,11 +7,11 @@ use influent::client::http::hurl::hyper::HyperHurl;
 
 #[test]
 fn test_create_client() {
-	let credentials = Credentials {
-		username: "gobwas",
-		password: "xxx",
-		database: "mydb"
-	};
+    let credentials = Credentials {
+        username: "gobwas",
+        password: "xxx",
+        database: "mydb"
+    };
 
-	create_client(credentials, vec!["http://localhost:8086"]);
+    create_client(credentials, vec!["http://localhost:8086"]);
 }
