@@ -7,7 +7,7 @@ use influent::client::http::HttpClient;
 use influent::client::http::hurl::hyper::HyperHurl;
 use influent::measurement::{Measurement, Value};
 
-fn make_client<'a>() -> HttpClient<'a> {
+fn before<'a>() -> HttpClient<'a> {
 	let credentials = Credentials {
         username: "gobwas",
         password: "xxxx",
@@ -22,9 +22,9 @@ fn make_client<'a>() -> HttpClient<'a> {
     client
 }
 
-#[test]
+// #[test]
 fn test_write_measurement() {
-    let mut client = make_client();
+    let mut client = before();
 
     let mut measurement = Measurement::new("sut");
 
