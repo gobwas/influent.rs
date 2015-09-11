@@ -1,16 +1,31 @@
 use ::measurement::Measurement;
 use ::serializer::Serializer;
 use ::client::{Precision, Client, Credentials, ClientError, ClientReadResult, ClientWriteResult};
+use ::hurl::{Hurl, Request, Response, Method, Auth};
 use std::collections::HashMap;
-use self::hurl::{Hurl, Request, Response, Method, Auth};
 
-pub mod hurl;
+const MAX_BATCH: u16 = 5000;
+
+pub enum WriteStatus {
+    Success,
+    CouldNotComplete,
+}
+
+// fixme
+pub struct Options {
+    pub max_batch: Option<u16>,
+    pub precision: Option<Precision>,
+    
+    pub epoch: Option<Precision>,
+    pub chunk_size: Option<u16>
+}
 
 pub struct HttpClient<'a> {
     credentials: Credentials<'a>,
     serializer: Box<Serializer>,
     hurl: Box<Hurl>,
-    hosts: Vec<&'a str>
+    hosts: Vec<&'a str>,
+    pub max_batch: u16
 }
 
 impl<'a> HttpClient<'a> {
@@ -19,7 +34,8 @@ impl<'a> HttpClient<'a> {
             credentials: credentials,
             serializer: serializer,
             hurl: hurl,
-            hosts: vec![]
+            hosts: vec![],
+            max_batch: MAX_BATCH
         }
     }
 
@@ -64,8 +80,8 @@ impl<'a> Client for HttpClient<'a> {
         match self.hurl.request(request) {
             Ok(ref resp) if resp.status == 200 => Ok(resp.to_string()),
             Ok(ref resp) if resp.status == 400 => Err(ClientError::Syntax(resp.to_string())),
-            Ok(_) => Err(ClientError::Unknown),
-            Err(reason) => Err(ClientError::Network(reason))
+            Ok(ref resp) => Err(ClientError::Unexpected(format!("Unexpected response. Status: {}; Body: \"{}\"", resp.status, resp.to_string()))),
+            Err(reason) => Err(ClientError::Communication(reason))
         }
     }
 
@@ -76,7 +92,7 @@ impl<'a> Client for HttpClient<'a> {
     fn write_many(&self, measurements: Vec<Measurement>, precision: Option<Precision>) -> ClientWriteResult {
         let host = self.get_host();
 
-        for chunk in measurements.chunks(5000) {
+        for chunk in measurements.chunks(self.max_batch as usize) {
             let mut lines = Vec::new();
 
             for measurement in chunk {
@@ -105,8 +121,11 @@ impl<'a> Client for HttpClient<'a> {
             };
 
             match self.hurl.request(request) {
-                Ok(_) => {},
-                Err(reason) => return Err(ClientError::Network(reason))
+                Ok(ref resp) if resp.status == 204 => {},
+                Ok(ref resp) if resp.status == 200 => return Err(ClientError::CouldNotComplete(resp.to_string())),
+                Ok(ref resp) if resp.status == 400 => return Err(ClientError::Syntax(resp.to_string())),
+                Ok(ref resp) => return Err(ClientError::Unexpected(format!("Unexpected response. Status: {}; Body: \"{}\"", resp.status, resp.to_string()))),
+                Err(reason) => return Err(ClientError::Communication(reason))
             };
         }
 
@@ -122,7 +141,7 @@ mod tests {
     use ::client::{Client};
     use super::HttpClient;
     use ::client::{Credentials, Precision};
-    use ::client::http::hurl::{Hurl, Request, Response, HurlResult};
+    use ::hurl::{Hurl, Request, Response, HurlResult};
     use ::measurement::Measurement;
     use std::cell::Cell;
     use std::clone::Clone;

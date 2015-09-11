@@ -1,6 +1,6 @@
 [package]
 name = "influent"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["gobwas <gobwas@gmail.com>"]
 
 description = "InfluxDB Rust driver"

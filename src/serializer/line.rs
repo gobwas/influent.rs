@@ -34,24 +34,15 @@ fn escape(s: &str) -> String {
 }
 
 fn as_string(s: &str) -> String {
-    vec![
-        "\"".to_string(),
-        s.replace("\"", "\\\""),
-        "\"".to_string()
-    ].connect("")
+    format!("\"{}\"", s.replace("\"", "\\\""))
 }
 
 fn as_integer(i: &i64) -> String {
-    i.to_string()
+    format!("{}i", i)
 }
 
 fn as_float(f: &f64) -> String {
-    let s = f.to_string();
-
-    match s.find(".") {
-        Some(_) => s,
-        None => vec![s, ".0".to_string()].connect("")
-    }
+    f.to_string()
 }
 
 fn as_boolean(b: &bool) -> String {
@@ -115,13 +106,18 @@ mod tests {
 
     #[test]
     fn test_as_integer() {
-        assert_eq!("10", as_integer(&10i64));
+        assert_eq!("1i",    as_integer(&1i64));
+        assert_eq!("345i",  as_integer(&345i64));
+        assert_eq!("2015i", as_integer(&2015i64));
+        assert_eq!("-10i",  as_integer(&-10i64));
     }
 
     #[test]
     fn test_as_float() {
-        assert_eq!("10.1", as_float(&10.1f64));
-        assert_eq!("10.0", as_float(&10f64));
+        assert_eq!("1", as_float(&1f64));
+        assert_eq!("1", as_float(&1.0f64));
+        assert_eq!("-3.14", as_float(&-3.14f64));
+        assert_eq!("10", as_float(&10f64));
     }
 
     #[test]
@@ -149,7 +145,7 @@ mod tests {
 
         measurement.set_timestamp(10);
 
-        assert_eq!("key,one\\ \\,two=three\\,\\ four,tag=value b=f,f=10.0,i=10,one\\,\\ two=\"three\",s=\"string\" 10", serializer.serialize(&measurement));
+        assert_eq!("key,one\\ \\,two=three\\,\\ four,tag=value b=f,f=10,i=10i,one\\,\\ two=\"three\",s=\"string\" 10", serializer.serialize(&measurement));
     }
 }
 

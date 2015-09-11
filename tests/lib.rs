@@ -4,7 +4,7 @@ use std::io::prelude::*;
 use influent::create_client;
 use influent::client::{Client, Credentials};
 use influent::client::http::HttpClient;
-use influent::client::http::hurl::hyper::HyperHurl;
+use influent::hurl::hyper::HyperHurl;
 use influent::measurement::{Measurement, Value};
 
 fn before<'a>() -> HttpClient<'a> {

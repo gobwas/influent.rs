@@ -45,7 +45,9 @@ pub type ClientReadResult = Result<String, ClientError>;
 
 #[derive(Debug)]
 pub enum ClientError {
-    Network(String),
+    CouldNotComplete(String),
+    Communication(String),
     Syntax(String),
+    Unexpected(String),
     Unknown
 }

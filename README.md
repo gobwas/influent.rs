@@ -6,9 +6,7 @@
 
 ## Overview
 
-This is a InfluxDB driver for Rust apps.
-
-Currently, it only supports write methods.
+This is an InfluxDB driver for Rust.
 
 ## Install
 
@@ -16,7 +14,7 @@ Currently, it only supports write methods.
 
 ```toml
 [dependencies]
-influent = "0.1"
+influent = "0.2"
 ```
 
 ## Usage
@@ -26,22 +24,30 @@ use influent::create_client;
 use influent::client::Credentials;
 use influent::measurement::{Measurement, Value};
 
+// prepare client
 let credentials = Credentials {
     username: "gobwas",
     password: "xxx",
     database: "mydb"
 };
-
 let hosts = vec!["http://localhost:8086"];
-
 let client = create_client(credentials, hosts);
 
 let mut measurement = Measurement::new("key");
-
-measurement.add_field("field", Value::String("hello"));
+measurement.add_field("some_field", Value::String("hello"));
+measurement.add_tag("some_region", "Moscow");
 
 client.write_one(measurement, None);
 ```
+
+## Compatibility
+
+This is a table of InfluxDB [write spec](https://influxdb.com/docs/v0.9/write_protocols/write_syntax.html) compatibility respectively to Influent version:
+
+InfluxDB | Influent
+---------|---------
+`0.9.2`  | `^0.1.0`
+`0.9.3`  | `^0.2.0`
 
 ## License
 

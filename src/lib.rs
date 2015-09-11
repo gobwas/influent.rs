@@ -1,12 +1,13 @@
 #[macro_use] extern crate log;
 
 pub mod client;
+pub mod hurl;
 pub mod serializer;
 pub mod measurement;
 
 use client::{Client, Credentials};
 use client::http::HttpClient;
-use client::http::hurl::hyper::HyperHurl;
+use hurl::hyper::HyperHurl;
 use serializer::Serializer;
 use serializer::line::LineSerializer;
 
