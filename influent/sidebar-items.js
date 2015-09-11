@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["create_client","Simple factory of `HttpClient` with `LineSerializer`"]],"mod":[["client",""],["hurl",""],["measurement",""],["serializer",""]]});

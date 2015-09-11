@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Value","Measurement's field value."]],"struct":[["Measurement","Measurement model."]]});
