@@ -33,12 +33,17 @@ let credentials = Credentials {
 let hosts = vec!["http://localhost:8086"];
 let client = create_client(credentials, hosts);
 
+// prepare measurement
 let mut measurement = Measurement::new("key");
 measurement.add_field("some_field", Value::String("hello"));
 measurement.add_tag("some_region", "Moscow");
 
 client.write_one(measurement, None);
 ```
+
+## Documentation
+
+API documentation placed [here](http://gobwas.github.io/influent.rs/influent/index.html).
 
 ## Compatibility
 
