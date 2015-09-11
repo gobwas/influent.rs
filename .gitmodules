@@ -1,0 +1,4 @@
+[submodule "io"]
+	path = io
+	url = git://github.com/gobwas/influent.rs.git
+	branch = gh-pages
