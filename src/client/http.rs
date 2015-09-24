@@ -29,7 +29,7 @@ pub struct HttpClient<'a> {
 }
 
 impl<'a> HttpClient<'a> {
-    pub fn new(credentials: Credentials, serializer: Box<Serializer>, hurl: Box<Hurl>) -> HttpClient {
+    pub fn new(credentials: Credentials<'a>, serializer: Box<Serializer>, hurl: Box<Hurl>) -> HttpClient<'a> {
         HttpClient {
             credentials: credentials,
             serializer: serializer,

@@ -22,7 +22,7 @@ fn before<'a>() -> HttpClient<'a> {
     client
 }
 
-// #[test]
+#[test]
 fn test_write_measurement() {
     let mut client = before();
 
