@@ -19,7 +19,7 @@ pub enum Precision {
     Microseconds,
     Milliseconds,
     Seconds,
-    Munutes,
+    Minutes,
     Hours
 }
 
@@ -30,7 +30,7 @@ impl ToString for Precision {
             Precision::Microseconds => "u",
             Precision::Milliseconds => "ms",
             Precision::Seconds      => "s",
-            Precision::Munutes      => "m",
+            Precision::Minutes      => "m",
             Precision::Hours        => "h"
         };
 
