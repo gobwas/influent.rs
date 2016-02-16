@@ -20,8 +20,10 @@ influent = "0.2"
 ## Usage
 
 ```rust
+extern crate influent;
+
 use influent::create_client;
-use influent::client::Credentials;
+use influent::client::{Client, Credentials};
 use influent::measurement::{Measurement, Value};
 
 // prepare client
@@ -56,7 +58,7 @@ InfluxDB | Influent
 
 ## License
 
-MIT © [Sergey Kamardin](https://github.com)
+MIT © [Sergey Kamardin](https://github.com/gobwas)
 
 [travis-image]: https://travis-ci.org/gobwas/influent.rs.svg?branch=master
 [travis-url]: https://travis-ci.org/gobwas/influent.rs
