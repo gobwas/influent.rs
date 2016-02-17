@@ -147,6 +147,18 @@ mod tests {
 
         assert_eq!("key,one\\ \\,two=three\\,\\ four,tag=value b=f,f=10,i=10i,one\\,\\ two=\"three\",s=\"string\" 10", serializer.serialize(&measurement));
     }
+
+    #[test]
+    fn test_line_serializer_long_timestamp() {
+        let serializer = LineSerializer::new();
+        let mut measurement = Measurement::new("key");
+
+        measurement.add_field("s", Value::String("string"));
+
+        measurement.set_timestamp(1434055562000000000);
+
+        assert_eq!("key s=\"string\" 1434055562000000000", serializer.serialize(&measurement));
+    }
 }
 
 

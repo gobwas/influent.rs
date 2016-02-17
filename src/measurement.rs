@@ -20,7 +20,7 @@ pub struct Measurement<'a> {
     pub key: &'a str,
 
     /// Timestamp.
-    pub timestamp: Option<i32>,
+    pub timestamp: Option<i64>,
 
     /// Map of fields.
     pub fields: BTreeMap<&'a str, Value<'a>>,
@@ -78,7 +78,7 @@ impl<'a> Measurement<'a> {
         self.tags.insert(tag, value);
     }
 
-    /// Sets the timestamp of the measurement.
+    /// Sets the timestamp of the measurement. It should be unix timestamp in nanosecond
     ///
     /// # Examples
     ///
@@ -87,9 +87,9 @@ impl<'a> Measurement<'a> {
     ///
     /// let mut measurement = Measurement::new("key");
     ///
-    /// measurement.set_timestamp(1440924047129)
+    /// measurement.set_timestamp(1434055562000000000)
     /// ```
-    pub fn set_timestamp(&mut self, timestamp: i32) {
+    pub fn set_timestamp(&mut self, timestamp: i64) {
         self.timestamp = Some(timestamp);
     }
 }
