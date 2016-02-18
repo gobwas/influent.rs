@@ -37,10 +37,10 @@ fn test_write_measurement() {
     measurement.add_tag("tag", "value");
     measurement.add_tag("tag, with comma", "three, four");
 
-    measurement.set_timestamp(110);
+    measurement.set_timestamp(1434055562000000000);
 
     assert!(client.write_one(measurement, None).is_ok());
 
-    let fixture = "{\"results\":[{\"series\":[{\"name\":\"sut\",\"columns\":[\"time\",\"boolean\",\"float\",\"integer\",\"string\",\"tag\",\"tag, with comma\",\"with, comma\"],\"values\":[[\"1970-01-01T00:00:00.00000011Z\",false,10,10,\"string\",\"value\",\"three, four\",\"comma, with\"]]}]}]}";
+    let fixture = "{\"results\":[{\"series\":[{\"name\":\"sut\",\"columns\":[\"time\",\"boolean\",\"float\",\"integer\",\"string\",\"tag\",\"tag, with comma\",\"with, comma\"],\"values\":[[\"2015-06-11T20:46:02Z\",false,10,10,\"string\",\"value\",\"three, four\",\"comma, with\"]]}]}]}";
     assert_eq!(fixture, client.query("select * from \"sut\"".to_string(), None).unwrap());
 }
