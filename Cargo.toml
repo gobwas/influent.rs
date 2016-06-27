@@ -10,6 +10,10 @@ readme = "README.md"
 keywords = ["influx", "influxdb"]
 license = "MIT"
 
+[features]
+default = ["http"]
+http = ["hyper"]
+
 [dependencies]
-hyper = "0.6.8"
+hyper = { version = "0.6.8", optional = true }
 log = "0.3.1"
