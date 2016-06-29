@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["create_client","Simple factory of `HttpClient` with `LineSerializer`"]],"mod":[["client",""],["hurl",""],["measurement",""],["serializer",""]]});
+initSidebarItems({"fn":[["create_client","Simple factory of `HttpClient` with `LineSerializer`"],["create_udp_client","Simple factory of `UdpClient` with `LineSerializer` Takes one parameter which is a host and port."]],"mod":[["client",""],["hurl",""],["measurement",""],["serializer",""]]});

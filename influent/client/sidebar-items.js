@@ -1,1 +1,1 @@
-initSidebarItems({"enum":[["ClientError",""],["Precision",""]],"mod":[["http",""]],"struct":[["Credentials",""]],"trait":[["Client",""]],"type":[["ClientReadResult",""],["ClientWriteResult",""]]});
+initSidebarItems({"enum":[["ClientError",""],["Precision",""]],"mod":[["http",""],["udp",""]],"struct":[["Credentials",""]],"trait":[["Client",""]],"type":[["ClientReadResult",""],["ClientWriteResult",""]]});
