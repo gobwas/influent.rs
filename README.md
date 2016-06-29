@@ -14,7 +14,7 @@ This is an InfluxDB driver for Rust.
 
 ```toml
 [dependencies]
-influent = "0.2"
+influent = "0.3"
 ```
 
 ## Usage
