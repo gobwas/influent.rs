@@ -1,6 +1,9 @@
 use ::measurement::Measurement;
+use std::io;
 
+#[cfg(feature = "http")]
 pub mod http;
+pub mod udp;
 
 pub trait Client {
     fn write_many(&self, Vec<Measurement>, Option<Precision>) -> ClientWriteResult;
@@ -50,4 +53,10 @@ pub enum ClientError {
     Syntax(String),
     Unexpected(String),
     Unknown
+}
+
+impl From<io::Error> for ClientError {
+    fn from(e: io::Error) -> Self {
+        ClientError::Communication(format!("{}", e))
+    }
 }
