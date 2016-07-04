@@ -57,7 +57,7 @@ impl<'a> Client for UdpClient<'a> {
 
     fn write_many(&self, measurements: &[Measurement], _: Option<Precision>) -> ClientWriteResult {
         let socket = try!(UdpSocket::bind("0.0.0.0:0"));
-        let addr = self.get_host().to_socket_addrs().unwrap().last().unwrap();
+        let addr = try!(self.get_host().to_socket_addrs()).last().unwrap();
 
         for chunk in measurements.chunks(self.max_batch as usize) {
             let mut bytes = Vec::new();
