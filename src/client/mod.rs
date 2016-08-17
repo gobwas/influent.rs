@@ -6,7 +6,7 @@ pub mod http;
 pub mod udp;
 
 pub trait Client {
-    fn write_many(&self, Vec<Measurement>, Option<Precision>) -> ClientWriteResult;
+    fn write_many(&self, &[Measurement], Option<Precision>) -> ClientWriteResult;
     fn write_one(&self, Measurement, Option<Precision>) -> ClientWriteResult;
     fn query(&self, String, Option<Precision>) -> ClientReadResult;
 }
