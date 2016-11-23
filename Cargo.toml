@@ -15,5 +15,5 @@ default = ["http"]
 http = ["hyper"]
 
 [dependencies]
-hyper = { version = "0.6.8", optional = true }
+hyper = { version = "0.9.12", optional = true }
 log = "0.3.1"
