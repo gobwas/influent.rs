@@ -57,31 +57,10 @@ impl Hurl for HyperHurl {
         // if request has query
         match req.query {
             Some(ref query) => {
-                // if any existing pairs
-                let existing: Vec<(String, String)> = match url.query_pairs() {
-                    Some(ref existing) => {
-                        existing.clone()
-                    }
-                    _ => {
-                        Vec::new()
-                    }
-                };
-
-                // final pairs
-                let mut pairs: Vec<(&str, &str)> = Vec::new();
-
-                // add first existing
-                for pair in &existing {
-                    pairs.push((&pair.0, &pair.1));
-                }
-
                 // add given query to the pairs
                 for (key, val) in query.iter() {
-                    pairs.push((key, val));
+                    url.query_pairs_mut().append_pair(key, val);
                 }
-
-                // set new pairs
-                url.set_query_from_pairs(pairs.into_iter());
             }
             _ => {}
         };
