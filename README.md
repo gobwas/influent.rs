@@ -19,7 +19,7 @@ PR are welcome and merged from time to time.
 
 ```toml
 [dependencies]
-influent = "0.3"
+influent = "0.4"
 ```
 
 ## Usage
