@@ -47,7 +47,7 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-108' class='srclink' href='../../src/hyper/client/mod.rs.html#1-526' title='goto source code'>[src]</a></span></h1>
+               </span><a id='src-80' class='srclink' href='../../src/hyper/client/mod.rs.html#1-724' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>HTTP Client</p>
 
 <h1 id='usage' class='section-header'><a href='#usage'>Usage</a></h1>
@@ -104,21 +104,21 @@ and make multiple requests simultaneously.</p>
                        <tr class=' module-item'>
                            <td><a class='mod' href='pool/index.html'
                                   title='hyper::client::pool'>pool</a></td>
-                           <td class='docblock short'>
+                           <td class='docblock-short'>
                                 <p>Client Connection Pooling</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='mod' href='request/index.html'
                                   title='hyper::client::request'>request</a></td>
-                           <td class='docblock short'>
+                           <td class='docblock-short'>
                                 <p>Client Requests</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='mod' href='response/index.html'
                                   title='hyper::client::response'>response</a></td>
-                           <td class='docblock short'>
+                           <td class='docblock-short'>
                                 <p>Client Responses</p>
                            </td>
                        </tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
@@ -126,14 +126,21 @@ and make multiple requests simultaneously.</p>
                        <tr class=' module-item'>
                            <td><a class='struct' href='struct.Client.html'
                                   title='hyper::client::Client'>Client</a></td>
-                           <td class='docblock short'>
+                           <td class='docblock-short'>
                                 <p>A Client to use additional features with Requests.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.ProxyConfig.html'
+                                  title='hyper::client::ProxyConfig'>ProxyConfig</a></td>
+                           <td class='docblock-short'>
+                                <p>Proxy server configuration with a custom connector and TLS wrapper.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='struct' href='struct.RequestBuilder.html'
                                   title='hyper::client::RequestBuilder'>RequestBuilder</a></td>
-                           <td class='docblock short'>
+                           <td class='docblock-short'>
                                 <p>Options for an individual Request.</p>
                            </td>
                        </tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
@@ -141,14 +148,14 @@ and make multiple requests simultaneously.</p>
                        <tr class=' module-item'>
                            <td><a class='enum' href='enum.Body.html'
                                   title='hyper::client::Body'>Body</a></td>
-                           <td class='docblock short'>
+                           <td class='docblock-short'>
                                 <p>An enum of possible body types for a Request.</p>
                            </td>
                        </tr>
                        <tr class=' module-item'>
                            <td><a class='enum' href='enum.RedirectPolicy.html'
                                   title='hyper::client::RedirectPolicy'>RedirectPolicy</a></td>
-                           <td class='docblock short'>
+                           <td class='docblock-short'>
                                 <p>Behavior regarding how to handle redirects within a Client.</p>
                            </td>
                        </tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
@@ -156,7 +163,7 @@ and make multiple requests simultaneously.</p>
                        <tr class=' module-item'>
                            <td><a class='trait' href='trait.IntoUrl.html'
                                   title='hyper::client::IntoUrl'>IntoUrl</a></td>
-                           <td class='docblock short'>
+                           <td class='docblock-short'>
                                 <p>A helper trait to convert common objects into a Url.</p>
                            </td>
                        </tr></table></section>
@@ -182,6 +189,8 @@ and make multiple requests simultaneously.</p>
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -213,11 +222,9 @@ and make multiple requests simultaneously.</p>
     <script>
         window.rootPath = "../../";
         window.currentCrate = "hyper";
-        window.playgroundUrl = "";
     </script>
     <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
-    
     <script defer src="../../search-index.js"></script>
 </body>
 </html>

@@ -47,8 +47,8 @@
                    <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                        [<span class='inner'>&#x2212;</span>]
                    </a>
-               </span><a id='src-429' class='srclink' href='../src/influent/src/lib.rs.html#38-46' title='goto source code'>[src]</a></span></h1>
-<pre class='rust fn'>pub fn create_client&lt;'a&gt;(credentials: <a class='struct' href='../influent/client/struct.Credentials.html' title='influent::client::Credentials'>Credentials</a>&lt;'a&gt;, hosts: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;&amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;) -&gt; <a class='struct' href='../influent/client/http/struct.HttpClient.html' title='influent::client::http::HttpClient'>HttpClient</a>&lt;'a&gt;</pre><div class='docblock'><p>Simple factory of <code>HttpClient</code> with <code>LineSerializer</code></p>
+               </span><a id='src-275' class='srclink' href='../src/influent/src/lib.rs.html#38-46' title='goto source code'>[src]</a></span></h1>
+<pre class='rust fn'>pub fn create_client&lt;'a&gt;(credentials: <a class='struct' href='../influent/client/struct.Credentials.html' title='influent::client::Credentials'>Credentials</a>&lt;'a&gt;,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; hosts: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;&amp;'a <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -&gt; <a class='struct' href='../influent/client/http/struct.HttpClient.html' title='influent::client::http::HttpClient'>HttpClient</a>&lt;'a&gt;</pre><div class='docblock'><p>Simple factory of <code>HttpClient</code> with <code>LineSerializer</code></p>
 
 <p>Takes two parameters, where first is <code>Credentials</code> struct, and second - <code>Vec&lt;&amp;str&gt;</code>, where each item
 is a InfluxDB host url.</p>
@@ -88,6 +88,8 @@ is a InfluxDB host url.</p>
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -119,11 +121,9 @@ is a InfluxDB host url.</p>
     <script>
         window.rootPath = "../";
         window.currentCrate = "influent";
-        window.playgroundUrl = "";
     </script>
     <script src="../jquery.js"></script>
     <script src="../main.js"></script>
-    
     <script defer src="../search-index.js"></script>
 </body>
 </html>

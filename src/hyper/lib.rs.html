@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/gobwas/.cargo/registry/src/github.com-1ecc6299db9ec823/hyper-0.6.13/src/lib.rs`.">
+    <meta name="description" content="Source to the Rust file `/Users/gobwas/.cargo/registry/src/github.com-1ecc6299db9ec823/hyper-0.10.0/src/lib.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>lib.rs.html -- source</title>
@@ -250,19 +250,11 @@
 <span id="206">206</span>
 <span id="207">207</span>
 <span id="208">208</span>
-<span id="209">209</span>
-<span id="210">210</span>
-<span id="211">211</span>
-<span id="212">212</span>
-<span id="213">213</span>
-<span id="214">214</span>
-<span id="215">215</span>
 </pre><pre class='rust '>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>doc</span>(<span class='ident'>html_root_url</span> <span class='op'>=</span> <span class='string'>&quot;https://hyperium.github.io/hyper/&quot;</span>)]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>test</span>, <span class='ident'>deny</span>(<span class='ident'>missing_docs</span>))]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>test</span>, <span class='ident'>deny</span>(<span class='ident'>warnings</span>))]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>all</span>(<span class='ident'>test</span>, <span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;nightly&quot;</span>), <span class='ident'>feature</span>(<span class='ident'>test</span>))]</span>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;timeouts&quot;</span>, <span class='ident'>feature</span>(<span class='ident'>socket_timeout</span>))]</span>
 
 <span class='doccomment'>//! # Hyper</span>
 <span class='doccomment'>//!</span>
@@ -391,18 +383,12 @@
 
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>rustc_serialize</span> <span class='kw'>as</span> <span class='ident'>serialize</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>time</span>;
-<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>url</span>;
-<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;openssl&quot;</span>)]</span>
-<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>openssl</span>;
-<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;serde-serialization&quot;</span>)]</span>
-<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>serde</span>;
-<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>cookie</span>;
+<span class='attribute'>#[<span class='ident'>macro_use</span>]</span> <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>url</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>unicase</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>httparse</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>num_cpus</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>traitobject</span>;
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>typeable</span>;
-<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>solicit</span>;
 
 <span class='attribute'>#[<span class='ident'>macro_use</span>]</span>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>language_tags</span>;
@@ -497,6 +483,8 @@
                     <dd>Move down in search results</dd>
                     <dt>&#9166;</dt>
                     <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
                 </dl>
             </div>
 
@@ -528,11 +516,9 @@
     <script>
         window.rootPath = "../../";
         window.currentCrate = "hyper";
-        window.playgroundUrl = "";
     </script>
     <script src="../../jquery.js"></script>
     <script src="../../main.js"></script>
-    
     <script defer src="../../search-index.js"></script>
 </body>
 </html>

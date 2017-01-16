@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["OpensslError","An error from the OpenSSL library"],["SslError","An SSL error"]]});
