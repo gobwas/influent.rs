@@ -8,6 +8,11 @@
 
 This is an InfluxDB driver for Rust.
 
+## Status
+
+Library is not under active development.
+PR are welcome and merged from time to time.
+
 ## Install
 
 > Cargo.toml
