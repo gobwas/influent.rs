@@ -23,7 +23,7 @@ pub struct Measurement<'a> {
     pub timestamp: Option<i64>,
 
     /// Map of fields.
-    pub fields: BTreeMap<&'a str, Value<'a>>,
+    pub fields: BTreeMap<Cow<'a, str>, Value<'a>>,
     
     /// Map of tags.
     pub tags: BTreeMap<Cow<'a,str>, Cow<'a,str>>
@@ -59,8 +59,8 @@ impl<'a> Measurement<'a> {
     ///
     /// measurement.add_field("field", Value::String("hello"));
     /// ```
-    pub fn add_field(&mut self, field: &'a str, value: Value<'a>) {
-        self.fields.insert(field, value);
+    pub fn add_field<T>(&mut self, field: T, value: Value<'a>) where T: Into<Cow<'a, str>> {
+        self.fields.insert(field.into(), value);
     }
 
     /// Adds tag to the measurement.
