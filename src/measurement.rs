@@ -24,7 +24,6 @@ pub struct Measurement<'a> {
 
     /// Map of fields.
     pub fields: BTreeMap<Cow<'a, str>, Value<'a>>,
-    
     /// Map of tags.
     pub tags: BTreeMap<Cow<'a,str>, Cow<'a,str>>
 }
@@ -33,7 +32,7 @@ impl<'a> Measurement<'a> {
     /// Constructs a new `Measurement`.
     ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use influent::measurement::Measurement;
     ///

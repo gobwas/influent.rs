@@ -1,10 +1,8 @@
 extern crate influent;
 
-use std::io::prelude::*;
 use influent::create_client;
 use influent::client::{Client, Credentials};
 use influent::client::http::HttpClient;
-use influent::hurl::hyper::HyperHurl;
 use influent::measurement::{Measurement, Value};
 
 fn before<'a>() -> HttpClient<'a> {
@@ -14,7 +12,7 @@ fn before<'a>() -> HttpClient<'a> {
         database: "test"
     };
 
-    let mut client = create_client(credentials, vec!["http://localhost:8086"]);
+    let client = create_client(credentials, vec!["http://localhost:8086"]);
 
     client.query("drop database test".to_string(), None).unwrap();
     client.query("create database test".to_string(), None).unwrap();
@@ -24,7 +22,7 @@ fn before<'a>() -> HttpClient<'a> {
 
 #[test]
 fn test_write_measurement() {
-    let mut client = before();
+    let client = before();
 
     let mut measurement = Measurement::new("sut");
 
@@ -37,7 +35,7 @@ fn test_write_measurement() {
     measurement.add_tag("tag", "value");
     measurement.add_tag("tag, with comma", "three, four");
 
-    measurement.set_timestamp(1434055562000000000);
+    measurement.set_timestamp(1_434_055_562_000_000_000);
 
     assert!(client.write_one(measurement, None).is_ok());
 

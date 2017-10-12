@@ -14,7 +14,7 @@ pub enum WriteStatus {
 pub struct Options {
     pub max_batch: Option<u16>,
     pub precision: Option<Precision>,
-    
+
     pub epoch: Option<Precision>,
     pub chunk_size: Option<u16>
 }
@@ -61,7 +61,7 @@ impl<'a> Client for UdpClient<'a> {
 
         for chunk in measurements.chunks(self.max_batch as usize) {
             let mut bytes = Vec::new();
-            const MAX_UDP_PACKET_LEN: usize = 65535;
+            const MAX_UDP_PACKET_LEN: usize = 65_535;
 
             for measurement in chunk {
                 let line = self.serializer.serialize(measurement);

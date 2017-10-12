@@ -50,7 +50,7 @@ pub fn create_client<'a>(credentials: Credentials<'a>, hosts: Vec<&'a str>) -> H
 /// use influent::create_udp_client;
 /// let client = create_udp_client(vec!["127.0.0.1:8089"]);
 /// ```
-pub fn create_udp_client<'a>(hosts: Vec<&'a str>) -> UdpClient<'a> {
+pub fn create_udp_client(hosts: Vec<&str>) -> UdpClient {
     let mut client = UdpClient::new(Box::new(LineSerializer::new()));
 
     for host in hosts {

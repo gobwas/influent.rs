@@ -15,7 +15,7 @@ pub enum WriteStatus {
 pub struct Options {
     pub max_batch: Option<u16>,
     pub precision: Option<Precision>,
-    
+
     pub epoch: Option<Precision>,
     pub chunk_size: Option<u16>
 }
@@ -59,12 +59,9 @@ impl<'a> Client for HttpClient<'a> {
         query.insert("db", self.credentials.database.to_string());
         query.insert("q", q);
 
-        match epoch {
-            Some(ref epoch) => {
-                query.insert("epoch", epoch.to_string());
-            }
-            _ => {}
-        };
+        if let Some(ref epoch) = epoch {
+            query.insert("epoch", epoch.to_string());
+        }
 
         let request = Request {
             url: &*{host.to_string() + "/query"},
@@ -102,12 +99,9 @@ impl<'a> Client for HttpClient<'a> {
             let mut query = HashMap::new();
             query.insert("db", self.credentials.database.to_string());
 
-            match precision {
-                Some(ref precision) => {
-                    query.insert("precision", precision.to_string());
-                }
-                _ => {}
-            };
+            if let Some(ref precision) = precision {
+                query.insert("precision", precision.to_string());
+            }
 
             let request = Request {
                 url: &*{host.to_string() + "/write"},
@@ -191,7 +185,7 @@ mod tests {
         }
     }
 
-    fn before<'a>(result: Box<Fn() -> HurlResult>) -> HttpClient<'a> {        
+    fn before<'a>(result: Box<Fn() -> HurlResult>) -> HttpClient<'a> {
         let credentials = Credentials {
             username: "gobwas",
             password: "1234",
