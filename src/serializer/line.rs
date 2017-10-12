@@ -83,7 +83,7 @@ impl Serializer for LineSerializer {
             _ => {}
         }
 
-        line.connect("")
+        line.join("")
     }
 }
 

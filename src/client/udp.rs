@@ -1,6 +1,6 @@
 use ::measurement::Measurement;
 use ::serializer::Serializer;
-use ::client::{Precision, Client, Credentials, ClientError, ClientReadResult, ClientWriteResult};
+use ::client::{Precision, Client, ClientError, ClientReadResult, ClientWriteResult};
 use std::net::{UdpSocket, ToSocketAddrs};
 
 const MAX_BATCH: u16 = 5000;

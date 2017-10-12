@@ -1,18 +1,15 @@
-#[macro_use] extern crate log;
-
 pub mod client;
 #[cfg(feature = "http")]
 pub mod hurl;
 pub mod serializer;
 pub mod measurement;
 
-use client::{Client, Credentials};
+use client::Credentials;
 use client::udp::UdpClient;
 #[cfg(feature = "http")]
 use client::http::HttpClient;
 #[cfg(feature = "http")]
 use hurl::hyper::HyperHurl;
-use serializer::Serializer;
 use serializer::line::LineSerializer;
 
 /// Simple factory of `HttpClient` with `LineSerializer`

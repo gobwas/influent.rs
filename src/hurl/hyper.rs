@@ -2,12 +2,10 @@ extern crate hyper;
 
 use self::hyper::Client as HyperClient;
 use self::hyper::method::Method as HyperMethod;
-use self::hyper::client::Body;
 use self::hyper::Url;
-use self::hyper::header::Connection;
 use self::hyper::header::{Headers, Authorization, Basic};
 
-use super::{Request, Response, Method, Auth, HurlResult};
+use super::{Request, Response, Method, HurlResult};
 use std::io::Read;
 
 use super::Hurl;
@@ -22,7 +20,7 @@ impl HyperHurl {
 
 impl Hurl for HyperHurl {
     fn request(&self, req: Request) -> HurlResult {
-        let mut client = HyperClient::new();
+        let client = HyperClient::new();
 
         // map request method to the hyper's
         let method = match req.method {

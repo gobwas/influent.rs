@@ -1,7 +1,7 @@
 use ::measurement::Measurement;
 use ::serializer::Serializer;
 use ::client::{Precision, Client, Credentials, ClientError, ClientReadResult, ClientWriteResult};
-use ::hurl::{Hurl, Request, Response, Method, Auth};
+use ::hurl::{Hurl, Request, Method, Auth};
 use std::collections::HashMap;
 
 const MAX_BATCH: u16 = 5000;
@@ -117,7 +117,7 @@ impl<'a> Client for HttpClient<'a> {
                     password: self.credentials.password
                 }),
                 query: Some(query),
-                body: Some(lines.connect("\n"))
+                body: Some(lines.join("\n"))
             };
 
             match self.hurl.request(request) {
