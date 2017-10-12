@@ -197,14 +197,14 @@ mod tests {
 
     #[test]
     fn test_write_one() {
-        let mut client = before(Box::new(|| Ok(Response { status: 200, body: "Ok".to_string() })));
+        let mut client = before(Box::new(|| Ok(Response { status: 204, body: "Ok".to_string() })));
         client.add_host("http://localhost:8086");
         assert!(client.write_one(Measurement::new("key"), Some(Precision::Nanoseconds)).is_ok());
     }
 
     #[test]
     fn test_write_many() {
-        let mut client = before(Box::new(|| Ok(Response { status: 200, body: "Ok".to_string() })));
+        let mut client = before(Box::new(|| Ok(Response { status: 204, body: "Ok".to_string() })));
         client.add_host("http://localhost:8086");
         assert!(client.write_many(&[Measurement::new("key")], Some(Precision::Nanoseconds)).is_ok());
     }
