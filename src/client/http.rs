@@ -138,9 +138,6 @@ mod tests {
     use ::hurl::{Hurl, Request, Response, HurlResult};
     use ::measurement::Measurement;
     use std::cell::Cell;
-    use std::clone::Clone;
-
-    const serialized : &'static str = "serialized";
 
     struct MockSerializer {
         serialize_count: Cell<u16>
@@ -158,7 +155,7 @@ mod tests {
         fn serialize(&self, measurement: &Measurement) -> String {
             println!("serializing: {:?}", measurement);
             self.serialize_count.set(self.serialize_count.get() + 1);
-            serialized.to_string()
+            "serialized".to_string()
         }
     }
 
@@ -202,14 +199,14 @@ mod tests {
     fn test_write_one() {
         let mut client = before(Box::new(|| Ok(Response { status: 200, body: "Ok".to_string() })));
         client.add_host("http://localhost:8086");
-        client.write_one(Measurement::new("key"), Some(Precision::Nanoseconds));
+        assert!(client.write_one(Measurement::new("key"), Some(Precision::Nanoseconds)).is_ok());
     }
 
     #[test]
     fn test_write_many() {
         let mut client = before(Box::new(|| Ok(Response { status: 200, body: "Ok".to_string() })));
         client.add_host("http://localhost:8086");
-        client.write_many(&[Measurement::new("key")], Some(Precision::Nanoseconds));
+        assert!(client.write_many(&[Measurement::new("key")], Some(Precision::Nanoseconds)).is_ok());
     }
 }
 

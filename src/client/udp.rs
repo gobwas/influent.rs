@@ -100,13 +100,13 @@ mod tests {
         let mut m = Measurement::new("lol");
         let val = measurement::Value::Integer(1488);
         m.add_field("value", val);
-        client.write_one(m, Some(Precision::Nanoseconds));
+        assert!(client.write_one(m, Some(Precision::Nanoseconds)).is_ok());
     }
 
     #[test]
     fn test_write_many() {
         let mut client = UdpClient::new(Box::new(LineSerializer::new()));
         client.add_host("127.0.0.1:8089");
-        client.write_many(&[Measurement::new("kek")], Some(Precision::Nanoseconds));
+        assert!(client.write_many(&[Measurement::new("kek")], Some(Precision::Nanoseconds)).is_ok());
     }
 }
