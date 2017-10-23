@@ -11,6 +11,7 @@ This is an InfluxDB driver for Rust.
 ## Status
 
 Library **is not under active development** right now.
+
 PR are welcome and merged from time to time.
 If you want to become a contributor please let me know.
 
