@@ -1,5 +1,5 @@
 use std::collections::BTreeMap;
-
+use std::borrow::Cow;
 #[derive(Debug)]
 /// Measurement's field value.
 pub enum Value<'a> {
@@ -23,10 +23,10 @@ pub struct Measurement<'a> {
     pub timestamp: Option<i64>,
 
     /// Map of fields.
-    pub fields: BTreeMap<&'a str, Value<'a>>,
+    pub fields: BTreeMap<Cow<'a, str>, Value<'a>>,
     
     /// Map of tags.
-    pub tags: BTreeMap<&'a str, &'a str>
+    pub tags: BTreeMap<Cow<'a,str>, Cow<'a,str>>
 }
 
 impl<'a> Measurement<'a> {
@@ -59,8 +59,8 @@ impl<'a> Measurement<'a> {
     ///
     /// measurement.add_field("field", Value::String("hello"));
     /// ```
-    pub fn add_field(&mut self, field: &'a str, value: Value<'a>) {
-        self.fields.insert(field, value);
+    pub fn add_field<T>(&mut self, field: T, value: Value<'a>) where T: Into<Cow<'a, str>> {
+        self.fields.insert(field.into(), value);
     }
 
     /// Adds tag to the measurement.
@@ -74,8 +74,8 @@ impl<'a> Measurement<'a> {
     ///
     /// measurement.add_tag("tag", "value");
     /// ```
-    pub fn add_tag(&mut self, tag: &'a str, value: &'a str) {
-        self.tags.insert(tag, value);
+    pub fn add_tag<I, K>(&mut self, tag: I, value: K) where I: Into<Cow<'a,str>>, K: Into<Cow<'a, str>> {
+        self.tags.insert(tag.into(), value.into());
     }
 
     /// Sets the timestamp of the measurement. It should be unix timestamp in nanosecond
