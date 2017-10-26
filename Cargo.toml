@@ -16,4 +16,3 @@ http = ["hyper"]
 
 [dependencies]
 hyper = { version = "^0.10.0", optional = true }
-log = "^0.3.6"

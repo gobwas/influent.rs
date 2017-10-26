@@ -1,6 +1,6 @@
 use ::measurement::Measurement;
 use ::serializer::Serializer;
-use ::client::{Precision, Client, Credentials, ClientError, ClientReadResult, ClientWriteResult};
+use ::client::{Precision, Client, ClientError, ClientReadResult, ClientWriteResult};
 use std::net::{UdpSocket, ToSocketAddrs};
 
 const MAX_BATCH: u16 = 5000;
@@ -14,7 +14,7 @@ pub enum WriteStatus {
 pub struct Options {
     pub max_batch: Option<u16>,
     pub precision: Option<Precision>,
-    
+
     pub epoch: Option<Precision>,
     pub chunk_size: Option<u16>
 }
@@ -61,7 +61,7 @@ impl<'a> Client for UdpClient<'a> {
 
         for chunk in measurements.chunks(self.max_batch as usize) {
             let mut bytes = Vec::new();
-            const MAX_UDP_PACKET_LEN: usize = 65535;
+            const MAX_UDP_PACKET_LEN: usize = 65_535;
 
             for measurement in chunk {
                 let line = self.serializer.serialize(measurement);
@@ -100,13 +100,13 @@ mod tests {
         let mut m = Measurement::new("lol");
         let val = measurement::Value::Integer(1488);
         m.add_field("value", val);
-        client.write_one(m, Some(Precision::Nanoseconds));
+        assert!(client.write_one(m, Some(Precision::Nanoseconds)).is_ok());
     }
 
     #[test]
     fn test_write_many() {
         let mut client = UdpClient::new(Box::new(LineSerializer::new()));
         client.add_host("127.0.0.1:8089");
-        client.write_many(&[Measurement::new("kek")], Some(Precision::Nanoseconds));
+        assert!(client.write_many(&[Measurement::new("kek")], Some(Precision::Nanoseconds)).is_ok());
     }
 }

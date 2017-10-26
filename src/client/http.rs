@@ -1,7 +1,7 @@
 use ::measurement::Measurement;
 use ::serializer::Serializer;
 use ::client::{Precision, Client, Credentials, ClientError, ClientReadResult, ClientWriteResult};
-use ::hurl::{Hurl, Request, Response, Method, Auth};
+use ::hurl::{Hurl, Request, Method, Auth};
 use std::collections::HashMap;
 
 const MAX_BATCH: u16 = 5000;
@@ -15,7 +15,7 @@ pub enum WriteStatus {
 pub struct Options {
     pub max_batch: Option<u16>,
     pub precision: Option<Precision>,
-    
+
     pub epoch: Option<Precision>,
     pub chunk_size: Option<u16>
 }
@@ -59,12 +59,9 @@ impl<'a> Client for HttpClient<'a> {
         query.insert("db", self.credentials.database.to_string());
         query.insert("q", q);
 
-        match epoch {
-            Some(ref epoch) => {
-                query.insert("epoch", epoch.to_string());
-            }
-            _ => {}
-        };
+        if let Some(ref epoch) = epoch {
+            query.insert("epoch", epoch.to_string());
+        }
 
         let request = Request {
             url: &*{host.to_string() + "/query"},
@@ -102,12 +99,9 @@ impl<'a> Client for HttpClient<'a> {
             let mut query = HashMap::new();
             query.insert("db", self.credentials.database.to_string());
 
-            match precision {
-                Some(ref precision) => {
-                    query.insert("precision", precision.to_string());
-                }
-                _ => {}
-            };
+            if let Some(ref precision) = precision {
+                query.insert("precision", precision.to_string());
+            }
 
             let request = Request {
                 url: &*{host.to_string() + "/write"},
@@ -117,7 +111,7 @@ impl<'a> Client for HttpClient<'a> {
                     password: self.credentials.password
                 }),
                 query: Some(query),
-                body: Some(lines.connect("\n"))
+                body: Some(lines.join("\n"))
             };
 
             match self.hurl.request(request) {
@@ -144,9 +138,6 @@ mod tests {
     use ::hurl::{Hurl, Request, Response, HurlResult};
     use ::measurement::Measurement;
     use std::cell::Cell;
-    use std::clone::Clone;
-
-    const serialized : &'static str = "serialized";
 
     struct MockSerializer {
         serialize_count: Cell<u16>
@@ -164,7 +155,7 @@ mod tests {
         fn serialize(&self, measurement: &Measurement) -> String {
             println!("serializing: {:?}", measurement);
             self.serialize_count.set(self.serialize_count.get() + 1);
-            serialized.to_string()
+            "serialized".to_string()
         }
     }
 
@@ -191,7 +182,7 @@ mod tests {
         }
     }
 
-    fn before<'a>(result: Box<Fn() -> HurlResult>) -> HttpClient<'a> {        
+    fn before<'a>(result: Box<Fn() -> HurlResult>) -> HttpClient<'a> {
         let credentials = Credentials {
             username: "gobwas",
             password: "1234",
@@ -206,16 +197,16 @@ mod tests {
 
     #[test]
     fn test_write_one() {
-        let mut client = before(Box::new(|| Ok(Response { status: 200, body: "Ok".to_string() })));
+        let mut client = before(Box::new(|| Ok(Response { status: 204, body: "Ok".to_string() })));
         client.add_host("http://localhost:8086");
-        client.write_one(Measurement::new("key"), Some(Precision::Nanoseconds));
+        assert!(client.write_one(Measurement::new("key"), Some(Precision::Nanoseconds)).is_ok());
     }
 
     #[test]
     fn test_write_many() {
-        let mut client = before(Box::new(|| Ok(Response { status: 200, body: "Ok".to_string() })));
+        let mut client = before(Box::new(|| Ok(Response { status: 204, body: "Ok".to_string() })));
         client.add_host("http://localhost:8086");
-        client.write_many(&[Measurement::new("key")], Some(Precision::Nanoseconds));
+        assert!(client.write_many(&[Measurement::new("key")], Some(Precision::Nanoseconds)).is_ok());
     }
 }
 

@@ -2,27 +2,26 @@ extern crate hyper;
 
 use self::hyper::Client as HyperClient;
 use self::hyper::method::Method as HyperMethod;
-use self::hyper::client::Body;
 use self::hyper::Url;
-use self::hyper::header::Connection;
 use self::hyper::header::{Headers, Authorization, Basic};
 
-use super::{Request, Response, Method, Auth, HurlResult};
+use super::{Request, Response, Method, HurlResult};
 use std::io::Read;
 
 use super::Hurl;
 
+#[derive(Default)]
 pub struct HyperHurl;
 
 impl HyperHurl {
     pub fn new() -> HyperHurl {
-        HyperHurl
+        HyperHurl::default()
     }
 }
 
 impl Hurl for HyperHurl {
     fn request(&self, req: Request) -> HurlResult {
-        let mut client = HyperClient::new();
+        let client = HyperClient::new();
 
         // map request method to the hyper's
         let method = match req.method {
@@ -40,50 +39,44 @@ impl Hurl for HyperHurl {
         };
 
         // if request need to be authorized
-        match req.auth {
-            Some(auth) => {
-                headers.set(
-                   Authorization(
-                       Basic {
-                           username: auth.username.to_string(),
-                           password: Some(auth.password.to_string())
-                       }
-                   )
-                );
-            }
-            _ => {}
-        };
+        if let Some(auth) = req.auth {
+            headers.set(
+               Authorization(
+                   Basic {
+                       username: auth.username.to_string(),
+                       password: Some(auth.password.to_string())
+                   }
+               )
+            );
+        }
 
         // if request has query
-        match req.query {
-            Some(ref query) => {
-                // if any existing pairs
-                let existing: Vec<(String, String)> = url.query_pairs().map(|(a,b)| (a.to_string(), b.to_string())).collect();
+        if let Some(ref query) = req.query {
+            // if any existing pairs
+            let existing: Vec<(String, String)> = url.query_pairs().map(|(a,b)| (a.to_string(), b.to_string())).collect();
 
-                // final pairs
-                let mut pairs: Vec<(&str, &str)> = Vec::new();
+            // final pairs
+            let mut pairs: Vec<(&str, &str)> = Vec::new();
 
-                // add first existing
-                for pair in &existing {
-                    pairs.push((&pair.0, &pair.1));
-                }
-
-                // add given query to the pairs
-                for (key, val) in query.iter() {
-                    pairs.push((key, val));
-                }
-
-                // set new pairs
-                url.query_pairs_mut().clear().extend_pairs(
-                    pairs.iter().map(|&(k, v)| { (&k[..], &v[..]) })
-                );
+            // add first existing
+            for pair in &existing {
+                pairs.push((&pair.0, &pair.1));
             }
-            _ => {}
-        };
+
+            // add given query to the pairs
+            for (key, val) in query.iter() {
+                pairs.push((key, val));
+            }
+
+            // set new pairs
+            url.query_pairs_mut().clear().extend_pairs(
+                pairs.iter().map(|&(k, v)| { (&k[..], &v[..]) })
+            );
+        }
 
         // create query
         let mut query = client.request(method, url).headers(headers);
-        
+
         // if request has body
         query = match req.body {
             Some(ref body) => {

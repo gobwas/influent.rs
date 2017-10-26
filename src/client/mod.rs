@@ -28,7 +28,7 @@ pub enum Precision {
 
 impl ToString for Precision {
     fn to_string(&self) -> String {
-        let s = match (*self) {
+        let s = match *self {
             Precision::Nanoseconds  => "n",
             Precision::Microseconds => "u",
             Precision::Milliseconds => "ms",

@@ -1,6 +1,7 @@
 use ::measurement::{Measurement, Value};
 use ::serializer::Serializer;
 
+#[derive(Default)]
 pub struct LineSerializer;
 
 /// Line spec `Measurement` serializer.
@@ -23,7 +24,7 @@ impl LineSerializer {
     /// assert_eq!("key,tag=value field=\"value\"", serializer.serialize(&measurement));
     /// ```
     pub fn new() -> LineSerializer {
-        LineSerializer
+        LineSerializer::default()
     }
 }
 
@@ -53,7 +54,7 @@ impl Serializer for LineSerializer {
     fn serialize(&self, measurement: &Measurement) -> String {
         let mut line = vec![escape(measurement.key)];
 
-        for (tag, value) in measurement.tags.iter() {
+        for (tag, value) in &measurement.tags {
             line.push(",".to_string());
             line.push(escape(tag));
             line.push("=".to_string());
@@ -62,28 +63,25 @@ impl Serializer for LineSerializer {
 
         let mut was_spaced = false;
 
-        for (field, value) in measurement.fields.iter() {
+        for (field, value) in &measurement.fields {
             line.push({if !was_spaced { was_spaced = true; " " } else { "," }}.to_string());
             line.push(escape(field));
             line.push("=".to_string());
 
-            match value {
-                &Value::String(ref s)  => line.push(as_string(s)),
-                &Value::Integer(ref i) => line.push(as_integer(i)),
-                &Value::Float(ref f)   => line.push(as_float(f)),
-                &Value::Boolean(ref b) => line.push(as_boolean(b))
+            match *value {
+                Value::String(s)  => line.push(as_string(s)),
+                Value::Integer(ref i) => line.push(as_integer(i)),
+                Value::Float(ref f)   => line.push(as_float(f)),
+                Value::Boolean(ref b) => line.push(as_boolean(b))
             };
         }
 
-        match measurement.timestamp {
-            Some(t) => {
+        if let Some(t) = measurement.timestamp {
                 line.push(" ".to_string());
                 line.push(t.to_string());
-            }
-            _ => {}
         }
 
-        line.connect("")
+        line.join("")
     }
 }
 
@@ -138,7 +136,7 @@ mod tests {
         measurement.add_field("b", Value::Boolean(false));
 
         measurement.add_tag("tag", "value");
-        
+
         measurement.add_field("one, two", Value::String("three"));
         measurement.add_tag("one ,two", "three, four");
 
