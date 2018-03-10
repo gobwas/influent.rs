@@ -1,9 +1,13 @@
 extern crate influent;
+extern crate tokio;
+extern crate futures;
 
 use influent::create_client;
 use influent::client::{Client, Credentials};
 use influent::client::http::HttpClient;
 use influent::measurement::{Measurement, Value};
+use futures::Future;
+use std::sync::Arc;
 
 fn before<'a>() -> HttpClient<'a> {
 	let credentials = Credentials {
@@ -12,12 +16,22 @@ fn before<'a>() -> HttpClient<'a> {
         database: "test"
     };
 
-    let client = create_client(credentials, vec!["http://localhost:8086"]);
+    let client = Arc::new(create_client(credentials, vec!["http://localhost:8086"]));
 
-    client.query("drop database test".to_string(), None).unwrap();
-    client.query("create database test".to_string(), None).unwrap();
+    {
+        let client = client.clone();
+        let mut rt = tokio::runtime::current_thread::Runtime::new().unwrap();
+        rt.block_on(
+            client.query("drop database test".to_string(), None).then(move |_| {
+                client.query("create database test".to_string(), None)
+            }).map(|_| ()).map_err(|_| ())
+        ).unwrap();
+    }
 
-    client
+    if let Ok(client) = Arc::try_unwrap(client) {
+        return client
+    }
+    panic!("wtf")
 }
 
 #[test]
@@ -37,8 +51,12 @@ fn test_write_measurement() {
 
     measurement.set_timestamp(1_434_055_562_000_000_000);
 
-    assert!(client.write_one(measurement, None).is_ok());
+    let mut rt = tokio::runtime::current_thread::Runtime::new().unwrap();
 
-    let fixture = "{\"results\":[{\"series\":[{\"name\":\"sut\",\"columns\":[\"time\",\"boolean\",\"float\",\"integer\",\"string\",\"tag\",\"tag, with comma\",\"with, comma\"],\"values\":[[\"2015-06-11T20:46:02Z\",false,10,10,\"string\",\"value\",\"three, four\",\"comma, with\"]]}]}]}";
-    assert_eq!(fixture, client.query("select * from \"sut\"".to_string(), None).unwrap());
+    rt.block_on(client.write_one(measurement, None).then(move |_| {
+        client.query("select * from \"sut\"".to_string(), None)
+    }).map(|res| {
+        let fixture = "{\"results\":[{\"series\":[{\"name\":\"sut\",\"columns\":[\"time\",\"boolean\",\"float\",\"integer\",\"string\",\"tag\",\"tag, with comma\",\"with, comma\"],\"values\":[[\"2015-06-11T20:46:02Z\",false,10,10,\"string\",\"value\",\"three, four\",\"comma, with\"]]}]}]}";
+        assert_eq!(fixture, res);
+    }).map_err(|e| println!("{:?}", e))).unwrap();
 }

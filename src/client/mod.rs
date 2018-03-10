@@ -1,9 +1,8 @@
 use ::measurement::Measurement;
 use std::io;
+use futures::Future;
 
-#[cfg(feature = "http")]
 pub mod http;
-pub mod udp;
 
 pub trait Client {
     fn write_many(&self, &[Measurement], Option<Precision>) -> ClientWriteResult;
@@ -41,10 +40,10 @@ impl ToString for Precision {
     }
 }
 
-pub type ClientWriteResult = Result<(), ClientError>;
+pub type ClientWriteResult = Box<Future<Item=(), Error=ClientError> + Send>;
 
 // TODO: here parsing json?
-pub type ClientReadResult = Result<String, ClientError>;
+pub type ClientReadResult = Box<Future<Item=String, Error=ClientError> + Send>;
 
 #[derive(Debug)]
 pub enum ClientError {
