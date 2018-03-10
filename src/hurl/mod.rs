@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use futures::Future;
 
 pub mod hyper;
 
@@ -27,7 +28,7 @@ impl ToString for Response {
     }
 }
 
-pub type HurlResult = Result<Response, String>;
+pub type HurlResult = Box<Future<Item=Response, Error=String> + Send>;
 
 #[derive(Debug)]
 pub enum Method {

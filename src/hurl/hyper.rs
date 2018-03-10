@@ -1,12 +1,12 @@
-extern crate hyper;
-
-use self::hyper::Client as HyperClient;
-use self::hyper::method::Method as HyperMethod;
-use self::hyper::Url;
-use self::hyper::header::{Headers, Authorization, Basic};
+use hyper::Client as HyperClient;
+use hyper::Method as HyperMethod;
+use hyper::Request as HyperRequest;
+use http::header::AUTHORIZATION;
+use url::Url;
+use base64;
+use futures::{self, Future, Stream};
 
 use super::{Request, Response, Method, HurlResult};
-use std::io::Read;
 
 use super::Hurl;
 
@@ -21,34 +21,20 @@ impl HyperHurl {
 
 impl Hurl for HyperHurl {
     fn request(&self, req: Request) -> HurlResult {
-        let client = HyperClient::new();
+        let client = HyperClient::default();
 
         // map request method to the hyper's
         let method = match req.method {
-            Method::POST => HyperMethod::Post,
-            Method::GET  => HyperMethod::Get
+            Method::POST => HyperMethod::POST,
+            Method::GET  => HyperMethod::GET,
         };
-
-        let mut headers = Headers::new();
 
         let mut url = match Url::parse(req.url) {
             Ok(u) => { u }
             Err(e) => {
-                return Err(format!("could not parse url: {:?}", e));
+                return Box::new(futures::future::err(format!("could not parse url: {:?}", e)));
             }
         };
-
-        // if request need to be authorized
-        if let Some(auth) = req.auth {
-            headers.set(
-               Authorization(
-                   Basic {
-                       username: auth.username.to_string(),
-                       password: Some(auth.password.to_string())
-                   }
-               )
-            );
-        }
 
         // if request has query
         if let Some(ref query) = req.query {
@@ -75,30 +61,37 @@ impl Hurl for HyperHurl {
         }
 
         // create query
-        let mut query = client.request(method, url).headers(headers);
+        let mut query = HyperRequest::builder();
+        query.method(method)
+            .uri(url.as_str());
 
-        // if request has body
-        query = match req.body {
-            Some(ref body) => {
-                query.body(body)
-            }
-            None => { query }
+        // if request need to be authorized
+        if let Some(auth) = req.auth {
+            let auth = base64::encode(&format!("{}:{}", auth.username, auth.password));
+            query.header(AUTHORIZATION, auth);
+        }
+
+        let request = if let Some(body) = req.body {
+            query.body(body.into()).unwrap()
+        } else {
+            query.body("".into()).unwrap()
         };
 
-        // go!
-        match query.send() {
-            Ok(ref mut resp) => {
-                let mut body = String::new();
-                resp.read_to_string(&mut body).unwrap();
+        Box::new(client
+            .request(request)
+            .and_then(|resp| {
+                let status = resp.status().as_u16();
 
-                Ok(Response {
-                    status: resp.status.to_u16(),
-                    body: body
-                })
-            }
-            Err(err) => {
-                Err(format!("something went wrong: {:?}", err))
-            }
-        }
+                resp.into_body().concat2().and_then(move |body| {
+                    Ok(String::from_utf8(body.to_vec()).unwrap())
+                }).and_then(move |body|
+                    Ok(Response {
+                        status,
+                        body
+                    })
+                )
+            })
+            .map_err(|_| format!(""))
+        )
     }
 }

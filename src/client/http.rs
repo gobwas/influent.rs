@@ -3,6 +3,7 @@ use ::serializer::Serializer;
 use ::client::{Precision, Client, Credentials, ClientError, ClientReadResult, ClientWriteResult};
 use ::hurl::{Hurl, Request, Method, Auth};
 use std::collections::HashMap;
+use futures::{Future, stream, Stream};
 
 const MAX_BATCH: u16 = 5000;
 
@@ -22,14 +23,14 @@ pub struct Options {
 
 pub struct HttpClient<'a> {
     credentials: Credentials<'a>,
-    serializer: Box<Serializer>,
-    hurl: Box<Hurl>,
+    serializer: Box<Serializer + Send + Sync>,
+    hurl: Box<Hurl + Send + Sync>,
     hosts: Vec<&'a str>,
     pub max_batch: u16
 }
 
 impl<'a> HttpClient<'a> {
-    pub fn new(credentials: Credentials<'a>, serializer: Box<Serializer>, hurl: Box<Hurl>) -> HttpClient<'a> {
+    pub fn new(credentials: Credentials<'a>, serializer: Box<Serializer + Send + Sync>, hurl: Box<Hurl + Send + Sync>) -> HttpClient<'a> {
         HttpClient {
             credentials: credentials,
             serializer: serializer,
@@ -74,12 +75,14 @@ impl<'a> Client for HttpClient<'a> {
             body: None
         };
 
-        match self.hurl.request(request) {
-            Ok(ref resp) if resp.status == 200 => Ok(resp.to_string()),
-            Ok(ref resp) if resp.status == 400 => Err(ClientError::Syntax(resp.to_string())),
-            Ok(ref resp) => Err(ClientError::Unexpected(format!("Unexpected response. Status: {}; Body: \"{}\"", resp.status, resp.to_string()))),
-            Err(reason) => Err(ClientError::Communication(reason))
-        }
+        Box::new(self.hurl.request(request).then(|res| {
+            match res {
+                Ok(ref resp) if resp.status == 200 => Ok(resp.to_string()),
+                Ok(ref resp) if resp.status == 400 => Err(ClientError::Syntax(resp.to_string())),
+                Ok(ref resp) => Err(ClientError::Unexpected(format!("Unexpected response. Status: {}; Body: \"{}\"", resp.status, resp.to_string()))),
+                Err(reason) => Err(ClientError::Communication(reason))
+            }
+        }))
     }
 
     fn write_one(&self, measurement: Measurement, precision: Option<Precision>) -> ClientWriteResult {
@@ -89,7 +92,7 @@ impl<'a> Client for HttpClient<'a> {
     fn write_many(&self, measurements: &[Measurement], precision: Option<Precision>) -> ClientWriteResult {
         let host = self.get_host();
 
-        for chunk in measurements.chunks(self.max_batch as usize) {
+        let futures = measurements.chunks(self.max_batch as usize).map(|chunk| {
             let mut lines = Vec::new();
 
             for measurement in chunk {
@@ -114,16 +117,18 @@ impl<'a> Client for HttpClient<'a> {
                 body: Some(lines.join("\n"))
             };
 
-            match self.hurl.request(request) {
-                Ok(ref resp) if resp.status == 204 => {},
-                Ok(ref resp) if resp.status == 200 => return Err(ClientError::CouldNotComplete(resp.to_string())),
-                Ok(ref resp) if resp.status == 400 => return Err(ClientError::Syntax(resp.to_string())),
-                Ok(ref resp) => return Err(ClientError::Unexpected(format!("Unexpected response. Status: {}; Body: \"{}\"", resp.status, resp.to_string()))),
-                Err(reason) => return Err(ClientError::Communication(reason))
-            };
-        }
+            self.hurl.request(request).then(|res| {
+                match res {
+                    Ok(ref resp) if resp.status == 204 => Ok(()),
+                    Ok(ref resp) if resp.status == 200 => Err(ClientError::CouldNotComplete(resp.to_string())),
+                    Ok(ref resp) if resp.status == 400 => Err(ClientError::Syntax(resp.to_string())),
+                    Ok(ref resp) => Err(ClientError::Unexpected(format!("Unexpected response. Status: {}; Body: \"{}\"", resp.status, resp.to_string()))),
+                    Err(reason) => Err(ClientError::Communication(reason))
+                }
+            })
+        });
 
-        Ok(())
+        Box::new(stream::futures_ordered(futures).for_each(|_| Ok(())))
     }
 }
 
@@ -137,16 +142,17 @@ mod tests {
     use ::client::{Credentials, Precision};
     use ::hurl::{Hurl, Request, Response, HurlResult};
     use ::measurement::Measurement;
-    use std::cell::Cell;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    use ::futures::{self, Future};
 
     struct MockSerializer {
-        serialize_count: Cell<u16>
+        serialize_count: AtomicUsize,
     }
 
     impl MockSerializer {
         fn new() -> MockSerializer {
             MockSerializer {
-                serialize_count: Cell::new(0)
+                serialize_count: AtomicUsize::new(0),
             }
         }
     }
@@ -154,20 +160,20 @@ mod tests {
     impl Serializer for MockSerializer {
         fn serialize(&self, measurement: &Measurement) -> String {
             println!("serializing: {:?}", measurement);
-            self.serialize_count.set(self.serialize_count.get() + 1);
+            self.serialize_count.fetch_add(1, Ordering::SeqCst);
             "serialized".to_string()
         }
     }
 
     struct MockHurl {
-        request_count: Cell<u16>,
-        result: Box<Fn() -> HurlResult>
+        request_count: AtomicUsize,
+        result: Box<(Fn() -> HurlResult) + Send + Sync>
     }
 
     impl MockHurl {
-        fn new(result: Box<Fn() -> HurlResult>) -> MockHurl {
+        fn new(result: Box<(Fn() -> HurlResult) + Send + Sync>) -> MockHurl {
             MockHurl {
-                request_count: Cell::new(0),
+                request_count: AtomicUsize::new(0),
                 result: result
             }
         }
@@ -175,14 +181,14 @@ mod tests {
 
     impl Hurl for MockHurl {
         fn request(&self, req: Request) -> HurlResult {
-            self.request_count.set(self.request_count.get() + 1);
             println!("sending: {:?}", req);
+            self.request_count.fetch_add(1, Ordering::SeqCst);
             let ref f = self.result;
             f()
         }
     }
 
-    fn before<'a>(result: Box<Fn() -> HurlResult>) -> HttpClient<'a> {
+    fn before<'a>(result: Box<(Fn() -> HurlResult) + Send + Sync>) -> HttpClient<'a> {
         let credentials = Credentials {
             username: "gobwas",
             password: "1234",
@@ -197,16 +203,16 @@ mod tests {
 
     #[test]
     fn test_write_one() {
-        let mut client = before(Box::new(|| Ok(Response { status: 204, body: "Ok".to_string() })));
+        let mut client = before(Box::new(|| Box::new(futures::future::ok(Response { status: 204, body: "Ok".to_string() }))));
         client.add_host("http://localhost:8086");
-        assert!(client.write_one(Measurement::new("key"), Some(Precision::Nanoseconds)).is_ok());
+        ::tokio::run(client.write_one(Measurement::new("key"), Some(Precision::Nanoseconds)).map_err(|e| panic!(e)));
     }
 
     #[test]
     fn test_write_many() {
-        let mut client = before(Box::new(|| Ok(Response { status: 204, body: "Ok".to_string() })));
+        let mut client = before(Box::new(|| Box::new(futures::future::ok(Response { status: 204, body: "Ok".to_string() }))));
         client.add_host("http://localhost:8086");
-        assert!(client.write_many(&[Measurement::new("key")], Some(Precision::Nanoseconds)).is_ok());
+        assert!(client.write_many(&[Measurement::new("key")], Some(Precision::Nanoseconds)).wait().is_ok());
     }
 }
 
