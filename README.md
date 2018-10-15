@@ -2,7 +2,7 @@
 
 [![Build Status][travis-image]][travis-url] [![crates.io][crates-image]][crates-url]
 
-> [InfluxDB](https://influxdb.com/) rust package
+> [InfluxDB](https://www.influxdata.com/) Rust package
 
 ## Overview
 
@@ -12,7 +12,7 @@ This is an InfluxDB driver for Rust.
 
 Library **is not under active development** right now.
 
-PR are welcome and merged from time to time.
+PRs are welcome and merged from time to time.
 If you want to become a collaborator of this library please let me know.
 
 ## Install
@@ -21,7 +21,7 @@ If you want to become a collaborator of this library please let me know.
 
 ```toml
 [dependencies]
-influent = "0.4"
+influent = "0.5"
 ```
 
 ## Usage
