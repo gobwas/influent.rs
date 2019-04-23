@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use futures::Future;
 
 pub mod hyper;
+pub mod reqwest;
 
 pub trait Hurl {
     fn request(&self, Request) -> HurlResult;

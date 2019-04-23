@@ -1,9 +1,8 @@
-extern crate tokio;
-extern crate tokio_executor;
 extern crate futures;
 extern crate http;
 extern crate base64;
 extern crate hyper;
+extern crate reqwest;
 extern crate url;
 
 pub mod client;
