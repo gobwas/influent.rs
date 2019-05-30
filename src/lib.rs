@@ -28,14 +28,14 @@ use serializer::line::LineSerializer;
 /// use influent::client::Credentials;
 ///
 /// let credentials = Credentials {
-///     username: "gobwas",
-///     password: "xxx",
-///     database: "mydb"
+///     username: String::from("gobwas"),
+///     password: String::from("xxx"),
+///     database: String::from("mydb")
 /// };
 ///
-/// let client = create_client(credentials, vec!["http://localhost:8086"]);
+/// let client = create_client(credentials, vec![String::from("http://localhost:8086")]);
 /// ```
-pub fn create_client<'a>(credentials: Credentials<'a>, hosts: Vec<&'a str>) -> HttpClient<'a> {
+pub fn create_client(credentials: Credentials, hosts: Vec<String>) -> HttpClient {
     let mut client = HttpClient::new(credentials, Box::new(LineSerializer::new()), Box::new(HyperHurl::new()));
 
     for host in hosts {

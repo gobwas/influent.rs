@@ -1,7 +1,7 @@
-use ::measurement::Measurement;
-use std::io;
-use futures::Future;
 
+use futures::Future;
+use measurement::Measurement;
+use std::io;
 pub mod http;
 
 pub trait Client {
@@ -10,10 +10,10 @@ pub trait Client {
     fn query(&self, String, Option<Precision>) -> ClientReadResult;
 }
 
-pub struct Credentials<'a> {
-    pub username: &'a str,
-    pub password: &'a str,
-    pub database: &'a str
+pub struct Credentials {
+    pub username: String,
+    pub password: String,
+    pub database: String,
 }
 
 pub enum Precision {
@@ -22,28 +22,28 @@ pub enum Precision {
     Milliseconds,
     Seconds,
     Minutes,
-    Hours
+    Hours,
 }
 
 impl ToString for Precision {
     fn to_string(&self) -> String {
         let s = match *self {
-            Precision::Nanoseconds  => "n",
+            Precision::Nanoseconds => "n",
             Precision::Microseconds => "u",
             Precision::Milliseconds => "ms",
-            Precision::Seconds      => "s",
-            Precision::Minutes      => "m",
-            Precision::Hours        => "h"
+            Precision::Seconds => "s",
+            Precision::Minutes => "m",
+            Precision::Hours => "h",
         };
 
         s.to_string()
     }
 }
 
-pub type ClientWriteResult = Box<Future<Item=(), Error=ClientError> + Send>;
+pub type ClientWriteResult = Box<Future<Item = (), Error = ClientError> + Send>;
 
 // TODO: here parsing json?
-pub type ClientReadResult = Box<Future<Item=String, Error=ClientError> + Send>;
+pub type ClientReadResult = Box<Future<Item = String, Error = ClientError> + Send>;
 
 #[derive(Debug)]
 pub enum ClientError {
@@ -51,7 +51,7 @@ pub enum ClientError {
     Communication(String),
     Syntax(String),
     Unexpected(String),
-    Unknown
+    Unknown,
 }
 
 impl From<io::Error> for ClientError {

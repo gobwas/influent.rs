@@ -21,16 +21,16 @@ pub struct Options {
     pub chunk_size: Option<u16>
 }
 
-pub struct HttpClient<'a> {
-    credentials: Credentials<'a>,
+pub struct HttpClient {
+    credentials: Credentials,
     serializer: Box<Serializer + Send + Sync>,
     hurl: Box<Hurl + Send + Sync>,
-    hosts: Vec<&'a str>,
+    hosts: Vec<String>,
     pub max_batch: u16
 }
 
-impl<'a> HttpClient<'a> {
-    pub fn new(credentials: Credentials<'a>, serializer: Box<Serializer + Send + Sync>, hurl: Box<Hurl + Send + Sync>) -> HttpClient<'a> {
+impl HttpClient {
+    pub fn new(credentials: Credentials, serializer: Box<Serializer + Send + Sync>, hurl: Box<Hurl + Send + Sync>) -> HttpClient {
         HttpClient {
             credentials: credentials,
             serializer: serializer,
@@ -40,36 +40,36 @@ impl<'a> HttpClient<'a> {
         }
     }
 
-    pub fn add_host(&mut self, host: &'a str) {
-        self.hosts.push(host);
+    pub fn add_host<S>(&mut self, host: S) where S: Into<String> {
+        self.hosts.push(host.into());
     }
 
-    fn get_host(&self) -> &'a str {
+    fn get_host(&self) -> String {
         match self.hosts.first() {
-            Some(host) => host,
+            Some(host) => host.to_string(),
             None => panic!("Could not get host")
         }
     }
 }
 
-impl<'a> Client for HttpClient<'a> {
+impl Client for HttpClient {
     fn query(&self, q: String, epoch: Option<Precision>) -> ClientReadResult {
         let host = self.get_host();
 
         let mut query = HashMap::new();
-        query.insert("db", self.credentials.database.to_string());
-        query.insert("q", q);
+        query.insert(String::from("db"), self.credentials.database.to_string());
+        query.insert(String::from("q"), q);
 
         if let Some(ref epoch) = epoch {
-            query.insert("epoch", epoch.to_string());
+            query.insert(String::from("epoch"), epoch.to_string());
         }
 
         let request = Request {
-            url: &*{host.to_string() + "/query"},
+            url: format!("{}/query", host.to_string()),
             method: Method::GET,
             auth: Some(Auth {
-                username: self.credentials.username,
-                password: self.credentials.password
+                username: self.credentials.username.clone(),
+                password: self.credentials.password.clone()
             }),
             query: Some(query),
             body: None
@@ -100,18 +100,18 @@ impl<'a> Client for HttpClient<'a> {
             }
 
             let mut query = HashMap::new();
-            query.insert("db", self.credentials.database.to_string());
+            query.insert(String::from("db"), self.credentials.database.to_string());
 
             if let Some(ref precision) = precision {
-                query.insert("precision", precision.to_string());
+                query.insert(String::from("precision"), precision.to_string());
             }
 
             let request = Request {
-                url: &*{host.to_string() + "/write"},
+                url: format!("{}/write", host.to_string()),
                 method: Method::POST,
                 auth: Some(Auth {
-                    username: self.credentials.username,
-                    password: self.credentials.password
+                    username: self.credentials.username.clone(),
+                    password: self.credentials.password.clone()
                 }),
                 query: Some(query),
                 body: Some(lines.join("\n"))
@@ -188,11 +188,11 @@ mod tests {
         }
     }
 
-    fn before<'a>(result: Box<(Fn() -> HurlResult) + Send + Sync>) -> HttpClient<'a> {
+    fn before(result: Box<(Fn() -> HurlResult) + Send + Sync>) -> HttpClient {
         let credentials = Credentials {
-            username: "gobwas",
-            password: "1234",
-            database: "test"
+            username: String::from("gobwas"),
+            password: String::from("1234"),
+            database: String::from("test")
         };
 
         let serializer = MockSerializer::new();

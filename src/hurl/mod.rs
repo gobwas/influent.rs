@@ -8,11 +8,11 @@ pub trait Hurl {
 }
 
 #[derive(Debug)]
-pub struct Request<'a> {
-    pub url: &'a str,
+pub struct Request {
+    pub url: String,
     pub method: Method,
-    pub auth: Option<Auth<'a>>,
-    pub query: Option<HashMap<&'a str, String>>,
+    pub auth: Option<Auth>,
+    pub query: Option<HashMap<String, String>>,
     pub body: Option<String>
 }
 
@@ -37,7 +37,7 @@ pub enum Method {
 }
 
 #[derive(Debug)]
-pub struct Auth<'a> {
-    pub username: &'a str,
-    pub password: &'a str
+pub struct Auth {
+    pub username: String,
+    pub password: String
 }

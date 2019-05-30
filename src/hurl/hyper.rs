@@ -29,7 +29,7 @@ impl Hurl for HyperHurl {
             Method::GET  => HyperMethod::GET,
         };
 
-        let mut url = match Url::parse(req.url) {
+        let mut url = match Url::parse(&req.url) {
             Ok(u) => { u }
             Err(e) => {
                 return Box::new(futures::future::err(format!("could not parse url: {:?}", e)));
