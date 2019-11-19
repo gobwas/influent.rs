@@ -65,13 +65,19 @@ impl<'a> Client for HttpClient<'a> {
             query.insert("epoch", epoch.to_string());
         }
 
+        let auth = if self.credentials.username == "" && self.credentials.password == "" {
+            None
+        } else {
+            Some(Auth {
+                username: self.credentials.username,
+                password: self.credentials.password
+            })
+        };
+
         let request = Request {
             url: &*{host.to_string() + "/query"},
             method: Method::GET,
-            auth: Some(Auth {
-                username: self.credentials.username,
-                password: self.credentials.password
-            }),
+            auth,
             query: Some(query),
             body: None
         };
