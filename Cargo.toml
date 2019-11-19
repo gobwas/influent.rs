@@ -2,6 +2,7 @@
 name = "influent"
 version = "0.5.2"
 authors = ["gobwas <gobwas@gmail.com>", "Bastien Orivel <eijebong@bananium.fr>"]
+edition = "2018"
 
 description = "InfluxDB Rust driver"
 documentation = "http://gobwas.github.io/influent.rs/influent/index.html"
@@ -11,10 +12,14 @@ keywords = ["influx", "influxdb"]
 license = "MIT"
 
 [dependencies]
-hyper = { version = "0.12" }
-tokio = "0.1"
-tokio-executor = "0.1"
-http = "0.1"
-url = "2.0"
-futures = "0.1"
-base64 = "0.10"
+async-trait = "0.1.18"
+futures = "0.3"
+reqwest = "0.10.0-alpha.2"
+url = "2.1"
+
+[dev-dependencies]
+tokio = "0.2.0-alpha.6"
+
+[badges]
+travis-ci = { repository = "gobwas/influent.rs", branch = "master" }
+maintenance = { status = "looking-for-maintainer" }

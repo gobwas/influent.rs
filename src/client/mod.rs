@@ -1,13 +1,14 @@
-use ::measurement::Measurement;
+use async_trait::async_trait;
+use crate::measurement::Measurement;
 use std::io;
-use futures::Future;
 
 pub mod http;
 
+#[async_trait]
 pub trait Client {
-    fn write_many(&self, &[Measurement], Option<Precision>) -> ClientWriteResult;
-    fn write_one(&self, Measurement, Option<Precision>) -> ClientWriteResult;
-    fn query(&self, String, Option<Precision>) -> ClientReadResult;
+    async fn write_many(&self, line: &[Measurement<'_>], precision: Option<Precision>) -> Result<(), ClientError>;
+    async fn write_one(&self, line: Measurement<'_>, precision: Option<Precision>) -> Result<(), ClientError>;
+    async fn query(&self, query: String, precision: Option<Precision>) -> Result<String, ClientError>;
 }
 
 pub struct Credentials<'a> {
@@ -39,11 +40,6 @@ impl ToString for Precision {
         s.to_string()
     }
 }
-
-pub type ClientWriteResult = Box<Future<Item=(), Error=ClientError> + Send>;
-
-// TODO: here parsing json?
-pub type ClientReadResult = Box<Future<Item=String, Error=ClientError> + Send>;
 
 #[derive(Debug)]
 pub enum ClientError {

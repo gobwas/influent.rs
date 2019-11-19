@@ -1,10 +1,11 @@
+use async_trait::async_trait;
 use std::collections::HashMap;
-use futures::Future;
 
-pub mod hyper;
+pub mod reqwest;
 
+#[async_trait]
 pub trait Hurl {
-    fn request(&self, Request) -> HurlResult;
+    async fn request(&self, req: Request<'_>) -> Result<Response, String>;
 }
 
 #[derive(Debug)]
@@ -27,8 +28,6 @@ impl ToString for Response {
         self.body.clone()
     }
 }
-
-pub type HurlResult = Box<Future<Item=Response, Error=String> + Send>;
 
 #[derive(Debug)]
 pub enum Method {

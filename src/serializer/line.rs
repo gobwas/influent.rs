@@ -1,5 +1,5 @@
-use ::measurement::{Measurement, Value};
-use ::serializer::Serializer;
+use crate::measurement::{Measurement, Value};
+use crate::serializer::Serializer;
 
 #[derive(Default)]
 pub struct LineSerializer;
@@ -38,16 +38,16 @@ fn as_string(s: &str) -> String {
     format!("\"{}\"", s.replace("\"", "\\\""))
 }
 
-fn as_integer(i: &i64) -> String {
+fn as_integer(i: i64) -> String {
     format!("{}i", i)
 }
 
-fn as_float(f: &f64) -> String {
+fn as_float(f: f64) -> String {
     f.to_string()
 }
 
-fn as_boolean(b: &bool) -> String {
-    if *b { "t".to_string() } else { "f".to_string() }
+fn as_boolean(b: bool) -> String {
+    if b { "t".to_string() } else { "f".to_string() }
 }
 
 impl Serializer for LineSerializer {
@@ -70,9 +70,9 @@ impl Serializer for LineSerializer {
 
             match *value {
                 Value::String(s)  => line.push(as_string(s)),
-                Value::Integer(ref i) => line.push(as_integer(i)),
-                Value::Float(ref f)   => line.push(as_float(f)),
-                Value::Boolean(ref b) => line.push(as_boolean(b))
+                Value::Integer(i) => line.push(as_integer(i)),
+                Value::Float(f)   => line.push(as_float(f)),
+                Value::Boolean(b) => line.push(as_boolean(b))
             };
         }
 
@@ -88,13 +88,13 @@ impl Serializer for LineSerializer {
 #[cfg(test)]
 mod tests {
     use super::{as_boolean, as_string, as_integer, as_float, escape, LineSerializer};
-    use ::serializer::Serializer;
-    use ::measurement::{Measurement, Value};
+    use crate::serializer::Serializer;
+    use crate::measurement::{Measurement, Value};
 
     #[test]
     fn test_as_boolean() {
-        assert_eq!("t", as_boolean(&true));
-        assert_eq!("f", as_boolean(&false));
+        assert_eq!("t", as_boolean(true));
+        assert_eq!("f", as_boolean(false));
     }
 
     #[test]
@@ -104,18 +104,18 @@ mod tests {
 
     #[test]
     fn test_as_integer() {
-        assert_eq!("1i",    as_integer(&1i64));
-        assert_eq!("345i",  as_integer(&345i64));
-        assert_eq!("2015i", as_integer(&2015i64));
-        assert_eq!("-10i",  as_integer(&-10i64));
+        assert_eq!("1i",    as_integer(1i64));
+        assert_eq!("345i",  as_integer(345i64));
+        assert_eq!("2015i", as_integer(2015i64));
+        assert_eq!("-10i",  as_integer(-10i64));
     }
 
     #[test]
     fn test_as_float() {
-        assert_eq!("1", as_float(&1f64));
-        assert_eq!("1", as_float(&1.0f64));
-        assert_eq!("-3.14", as_float(&-3.14f64));
-        assert_eq!("10", as_float(&10f64));
+        assert_eq!("1", as_float(1f64));
+        assert_eq!("1", as_float(1.0f64));
+        assert_eq!("-3.14", as_float(-3.14f64));
+        assert_eq!("10", as_float(10f64));
     }
 
     #[test]

@@ -3,9 +3,9 @@ sudo: false
 language: rust
 
 before_install:
-    - wget http://influxdb.s3.amazonaws.com/influxdb_0.9.4.1_amd64.deb
-    - dpkg-deb -x influxdb_0.9.4.1_amd64.deb $HOME
-    - $HOME/opt/influxdb/versions/0.9.4.1/influxd > $HOME/influx.log 2>&1 &
+    - wget https://dl.influxdata.com/influxdb/releases/influxdb_1.7.9_amd64.deb
+    - dpkg-deb -x influxdb_1.7.9_amd64.deb $HOME
+    - $HOME/usr/bin/influxd > $HOME/influx.log 2>&1 &
 
 after_script:
     - cat $HOME/influx.log

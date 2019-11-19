@@ -1,4 +1,4 @@
-use ::measurement::Measurement;
+use crate::measurement::Measurement;
 
 pub mod line;
 

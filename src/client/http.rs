@@ -1,9 +1,9 @@
-use ::measurement::Measurement;
-use ::serializer::Serializer;
-use ::client::{Precision, Client, Credentials, ClientError, ClientReadResult, ClientWriteResult};
-use ::hurl::{Hurl, Request, Method, Auth};
+use async_trait::async_trait;
+use crate::measurement::Measurement;
+use crate::serializer::Serializer;
+use crate::client::{Precision, Client, Credentials, ClientError};
+use crate::hurl::{Hurl, Request, Method, Auth};
 use std::collections::HashMap;
-use futures::{Future, stream, Stream};
 
 const MAX_BATCH: u16 = 5000;
 
@@ -23,18 +23,18 @@ pub struct Options {
 
 pub struct HttpClient<'a> {
     credentials: Credentials<'a>,
-    serializer: Box<Serializer + Send + Sync>,
-    hurl: Box<Hurl + Send + Sync>,
+    serializer: Box<dyn Serializer + Send + Sync>,
+    hurl: Box<dyn Hurl + Send + Sync>,
     hosts: Vec<&'a str>,
     pub max_batch: u16
 }
 
 impl<'a> HttpClient<'a> {
-    pub fn new(credentials: Credentials<'a>, serializer: Box<Serializer + Send + Sync>, hurl: Box<Hurl + Send + Sync>) -> HttpClient<'a> {
+    pub fn new(credentials: Credentials<'a>, serializer: Box<dyn Serializer + Send + Sync>, hurl: Box<dyn Hurl + Send + Sync>) -> HttpClient<'a> {
         HttpClient {
-            credentials: credentials,
-            serializer: serializer,
-            hurl: hurl,
+            credentials,
+            serializer,
+            hurl,
             hosts: vec![],
             max_batch: MAX_BATCH
         }
@@ -52,8 +52,9 @@ impl<'a> HttpClient<'a> {
     }
 }
 
+#[async_trait]
 impl<'a> Client for HttpClient<'a> {
-    fn query(&self, q: String, epoch: Option<Precision>) -> ClientReadResult {
+    async fn query(&self, q: String, epoch: Option<Precision>) -> Result<String, ClientError> {
         let host = self.get_host();
 
         let mut query = HashMap::new();
@@ -75,24 +76,23 @@ impl<'a> Client for HttpClient<'a> {
             body: None
         };
 
-        Box::new(self.hurl.request(request).then(|res| {
-            match res {
-                Ok(ref resp) if resp.status == 200 => Ok(resp.to_string()),
-                Ok(ref resp) if resp.status == 400 => Err(ClientError::Syntax(resp.to_string())),
-                Ok(ref resp) => Err(ClientError::Unexpected(format!("Unexpected response. Status: {}; Body: \"{}\"", resp.status, resp.to_string()))),
-                Err(reason) => Err(ClientError::Communication(reason))
-            }
-        }))
+        let resp = self.hurl.request(request).await
+            .map_err(ClientError::Communication)?;
+        match resp.status {
+            200 => Ok(resp.to_string()),
+            400 => Err(ClientError::Syntax(resp.to_string())),
+            _ => Err(ClientError::Unexpected(format!("Unexpected response. Status: {}; Body: \"{}\"", resp.status, resp.to_string()))),
+        }
     }
 
-    fn write_one(&self, measurement: Measurement, precision: Option<Precision>) -> ClientWriteResult {
-        self.write_many(&[measurement], precision)
+    async fn write_one(&self, measurement: Measurement<'_>, precision: Option<Precision>) -> Result<(), ClientError> {
+        self.write_many(&[measurement], precision).await
     }
 
-    fn write_many(&self, measurements: &[Measurement], precision: Option<Precision>) -> ClientWriteResult {
+    async fn write_many(&self, measurements: &[Measurement<'_>], precision: Option<Precision>) -> Result<(), ClientError> {
         let host = self.get_host();
 
-        let futures = measurements.chunks(self.max_batch as usize).map(|chunk| {
+        for chunk in measurements.chunks(self.max_batch as usize) {
             let mut lines = Vec::new();
 
             for measurement in chunk {
@@ -117,18 +117,17 @@ impl<'a> Client for HttpClient<'a> {
                 body: Some(lines.join("\n"))
             };
 
-            self.hurl.request(request).then(|res| {
-                match res {
-                    Ok(ref resp) if resp.status == 204 => Ok(()),
-                    Ok(ref resp) if resp.status == 200 => Err(ClientError::CouldNotComplete(resp.to_string())),
-                    Ok(ref resp) if resp.status == 400 => Err(ClientError::Syntax(resp.to_string())),
-                    Ok(ref resp) => Err(ClientError::Unexpected(format!("Unexpected response. Status: {}; Body: \"{}\"", resp.status, resp.to_string()))),
-                    Err(reason) => Err(ClientError::Communication(reason))
-                }
-            })
-        });
+            let resp = self.hurl.request(request).await
+                .map_err(ClientError::Communication)?;
+            match resp.status {
+                204 => (),
+                200 => return Err(ClientError::CouldNotComplete(resp.to_string())),
+                400 => return Err(ClientError::Syntax(resp.to_string())),
+                _ => return Err(ClientError::Unexpected(format!("Unexpected response. Status: {}; Body: \"{}\"", resp.status, resp.to_string())))
+            };
+        }
 
-        Box::new(stream::futures_ordered(futures).for_each(|_| Ok(())))
+        Ok(())
     }
 }
 
@@ -136,14 +135,14 @@ impl<'a> Client for HttpClient<'a> {
 
 #[cfg(test)]
 mod tests {
-    use ::serializer::Serializer;
-    use ::client::{Client};
+    use async_trait::async_trait;
+    use crate::serializer::Serializer;
+    use crate::client::{Client};
     use super::HttpClient;
-    use ::client::{Credentials, Precision};
-    use ::hurl::{Hurl, Request, Response, HurlResult};
-    use ::measurement::Measurement;
+    use crate::client::{Credentials, Precision};
+    use crate::hurl::{Hurl, Request, Response};
+    use crate::measurement::Measurement;
     use std::sync::atomic::{AtomicUsize, Ordering};
-    use ::futures::{self, Future};
 
     struct MockSerializer {
         serialize_count: AtomicUsize,
@@ -167,20 +166,21 @@ mod tests {
 
     struct MockHurl {
         request_count: AtomicUsize,
-        result: Box<(Fn() -> HurlResult) + Send + Sync>
+        result: Box<dyn (Fn() -> Result<Response, String>) + Send + Sync>
     }
 
     impl MockHurl {
-        fn new(result: Box<(Fn() -> HurlResult) + Send + Sync>) -> MockHurl {
+        fn new(result: Box<dyn (Fn() -> Result<Response, String>) + Send + Sync>) -> MockHurl {
             MockHurl {
                 request_count: AtomicUsize::new(0),
-                result: result
+                result
             }
         }
     }
 
+    #[async_trait]
     impl Hurl for MockHurl {
-        fn request(&self, req: Request) -> HurlResult {
+        async fn request(&self, req: Request<'_>) -> Result<Response, String> {
             println!("sending: {:?}", req);
             self.request_count.fetch_add(1, Ordering::SeqCst);
             let ref f = self.result;
@@ -188,7 +188,7 @@ mod tests {
         }
     }
 
-    fn before<'a>(result: Box<(Fn() -> HurlResult) + Send + Sync>) -> HttpClient<'a> {
+    fn before<'a>(result: Box<dyn (Fn() -> Result<Response, String>) + Send + Sync>) -> HttpClient<'a> {
         let credentials = Credentials {
             username: "gobwas",
             password: "1234",
@@ -201,18 +201,20 @@ mod tests {
         HttpClient::new(credentials, Box::new(serializer), Box::new(hurl))
     }
 
-    #[test]
-    fn test_write_one() {
-        let mut client = before(Box::new(|| Box::new(futures::future::ok(Response { status: 204, body: "Ok".to_string() }))));
+    #[tokio::test]
+    async fn test_write_one() {
+        let mut client = before(Box::new(|| Ok(Response { status: 204, body: "Ok".to_string() })));
         client.add_host("http://localhost:8086");
-        ::tokio::run(client.write_one(Measurement::new("key"), Some(Precision::Nanoseconds)).map_err(|e| panic!(e)));
+        if let Err(e) = client.write_one(Measurement::new("key"), Some(Precision::Nanoseconds)).await {
+            panic!(e);
+        }
     }
 
-    #[test]
-    fn test_write_many() {
-        let mut client = before(Box::new(|| Box::new(futures::future::ok(Response { status: 204, body: "Ok".to_string() }))));
+    #[tokio::test]
+    async fn test_write_many() {
+        let mut client = before(Box::new(|| Ok(Response { status: 204, body: "Ok".to_string() })));
         client.add_host("http://localhost:8086");
-        assert!(client.write_many(&[Measurement::new("key")], Some(Precision::Nanoseconds)).wait().is_ok());
+        assert!(client.write_many(&[Measurement::new("key")], Some(Precision::Nanoseconds)).await.is_ok());
     }
 }
 
