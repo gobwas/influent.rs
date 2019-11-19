@@ -1,6 +1,6 @@
 [package]
 name = "influent"
-version = "0.5.2"
+version = "0.6.0"
 authors = ["gobwas <gobwas@gmail.com>", "Bastien Orivel <eijebong@bananium.fr>"]
 edition = "2018"
 
