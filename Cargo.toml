@@ -10,6 +10,8 @@ readme = "README.md"
 keywords = ["influx", "influxdb"]
 license = "MIT"
 
+maintenance = { status = "looking-for-maintainer" }
+
 [dependencies]
 hyper = { version = "0.12" }
 tokio = "0.1"
