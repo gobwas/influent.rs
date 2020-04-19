@@ -14,8 +14,7 @@ maintenance = { status = "looking-for-maintainer" }
 
 [dependencies]
 hyper = { version = "0.12" }
-tokio = "0.1"
-tokio-executor = "0.1"
+reqwest = "0.9"
 http = "0.1"
 url = "2.0"
 futures = "0.1"
