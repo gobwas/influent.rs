@@ -1,11 +1,3 @@
-extern crate tokio;
-extern crate tokio_executor;
-extern crate futures;
-extern crate http;
-extern crate base64;
-extern crate hyper;
-extern crate url;
-
 pub mod client;
 pub mod hurl;
 pub mod serializer;
@@ -13,7 +5,7 @@ pub mod measurement;
 
 use client::Credentials;
 use client::http::HttpClient;
-use hurl::hyper::HyperHurl;
+use hurl::reqwest::ReqwestHurl;
 use serializer::line::LineSerializer;
 
 /// Simple factory of `HttpClient` with `LineSerializer`
@@ -36,7 +28,7 @@ use serializer::line::LineSerializer;
 /// let client = create_client(credentials, vec!["http://localhost:8086"]);
 /// ```
 pub fn create_client<'a>(credentials: Credentials<'a>, hosts: Vec<&'a str>) -> HttpClient<'a> {
-    let mut client = HttpClient::new(credentials, Box::new(LineSerializer::new()), Box::new(HyperHurl::new()));
+    let mut client = HttpClient::new(credentials, Box::new(LineSerializer::new()), Box::new(ReqwestHurl::new()));
 
     for host in hosts {
         client.add_host(host);

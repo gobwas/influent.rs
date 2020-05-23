@@ -21,7 +21,7 @@ If you want to become a collaborator of this library please let me know.
 
 ```toml
 [dependencies]
-influent = "0.5"
+influent = "0.6"
 ```
 
 ## Usage
@@ -62,6 +62,7 @@ InfluxDB | Influent
 ---------|---------
 `0.9.2`  | `^0.1.0`
 `0.9.3`  | `^0.2.0`
+`1.8`    | `^0.6.0`
 
 ## License
 

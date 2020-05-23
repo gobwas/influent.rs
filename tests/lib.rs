@@ -6,10 +6,9 @@ use influent::create_client;
 use influent::client::{Client, Credentials};
 use influent::client::http::HttpClient;
 use influent::measurement::{Measurement, Value};
-use futures::Future;
 use std::sync::Arc;
 
-fn before<'a>() -> HttpClient<'a> {
+async fn before<'a>() -> HttpClient<'a> {
 	let credentials = Credentials {
         username: "gobwas",
         password: "xxxx",
@@ -17,26 +16,20 @@ fn before<'a>() -> HttpClient<'a> {
     };
 
     let client = Arc::new(create_client(credentials, vec!["http://localhost:8086"]));
-
-    {
-        let client = client.clone();
-        let mut rt = tokio::runtime::current_thread::Runtime::new().unwrap();
-        rt.block_on(
-            client.query("drop database test".to_string(), None).then(move |_| {
-                client.query("create database test".to_string(), None)
-            }).map(|_| ()).map_err(|_| ())
-        ).unwrap();
-    }
+    client.query("drop database test".to_owned(), None)
+        .await.expect("failed to drop");
+    client.query("create database test".to_owned(), None)
+        .await.expect("failed to create");
 
     if let Ok(client) = Arc::try_unwrap(client) {
         return client
     }
-    panic!("wtf")
+    unreachable!()
 }
 
-#[test]
-fn test_write_measurement() {
-    let client = before();
+#[tokio::test]
+async fn test_write_measurement() {
+    let client = before().await;
 
     let mut measurement = Measurement::new("sut");
 
@@ -51,12 +44,19 @@ fn test_write_measurement() {
 
     measurement.set_timestamp(1_434_055_562_000_000_000);
 
-    let mut rt = tokio::runtime::current_thread::Runtime::new().unwrap();
-
-    rt.block_on(client.write_one(measurement, None).then(move |_| {
-        client.query("select * from \"sut\"".to_string(), None)
-    }).map(|res| {
-        let fixture = "{\"results\":[{\"series\":[{\"name\":\"sut\",\"columns\":[\"time\",\"boolean\",\"float\",\"integer\",\"string\",\"tag\",\"tag, with comma\",\"with, comma\"],\"values\":[[\"2015-06-11T20:46:02Z\",false,10,10,\"string\",\"value\",\"three, four\",\"comma, with\"]]}]}]}";
-        assert_eq!(fixture, res);
-    }).map_err(|e| println!("{:?}", e))).unwrap();
+    client.write_one(measurement, None)
+        .await.expect("failed to write one");
+    match client.query("select * from \"sut\"".to_owned(), None).await {
+        Ok(res) => {
+            // Response from InfluxDB 1.7.9
+            let fixture = concat!(
+                r#"{"results":[{"statement_id":0,"series":[{"name":"sut","columns""#,
+                r#":["time","boolean","float","integer","string","tag","tag, with "#,
+                r#"comma","with, comma"],"values":[["2015-06-11T20:46:02Z",false,1"#,
+                r#"0,10,"string","value","three, four","comma, with"]]}]}]}"#, "\n"
+            );
+            assert_eq!(fixture, res);
+        },
+        Err(e) => panic!("{:?}", e),
+    };
 }

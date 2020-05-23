@@ -40,7 +40,7 @@ impl<'a> Measurement<'a> {
     /// ```
     pub fn new(key: &str) -> Measurement {
         Measurement {
-            key: key,
+            key,
             timestamp: None,
             fields: BTreeMap::new(),
             tags: BTreeMap::new()
