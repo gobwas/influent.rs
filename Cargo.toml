@@ -12,13 +12,13 @@ keywords = ["influx", "influxdb"]
 license = "MIT"
 
 [dependencies]
-async-trait = "0.1.18"
+async-trait = "0.1"
 futures = "0.3"
-reqwest = "0.10.0-alpha.2"
+reqwest = "0.10"
 url = "2.1"
 
 [dev-dependencies]
-tokio = "0.2.0-alpha.6"
+tokio = "0.2"
 
 [badges]
 travis-ci = { repository = "gobwas/influent.rs", branch = "master" }
