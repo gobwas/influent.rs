@@ -18,7 +18,7 @@ reqwest = "0.10"
 url = "2.1"
 
 [dev-dependencies]
-tokio = "0.2"
+tokio = { version = "0.2", features = ["rt-threaded", "macros"] }
 
 [badges]
 travis-ci = { repository = "gobwas/influent.rs", branch = "master" }
